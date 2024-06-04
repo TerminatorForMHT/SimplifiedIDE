@@ -101,7 +101,16 @@ class Editor(QsciScintilla):
         __jump_info = {}
         jediLib = JdeiLib(source=self.text(), filename=self.current_file_path)
         if Qt.KeyboardModifier.ControlModifier and event.modifiers():
-            line, index = self.getCursorPosition()
+            # 获取鼠标点击的像素位置
+            x = int(event.position().x())
+            y = int(event.position().y())
+
+            # 将像素位置转换为文档中的字符位置
+            pos = self.SendScintilla(QsciScintilla.SCI_POSITIONFROMPOINT, x, y)
+
+            # 将字符位置转换为行和列位置
+            line = self.SendScintilla(QsciScintilla.SCI_LINEFROMPOSITION, pos)
+            index = self.SendScintilla(QsciScintilla.SCI_GETCOLUMN, pos)
             line += 1
             assign_addr = jediLib.getAssignment(line, index)
             reference_addr = jediLib.getReferences(line, index)

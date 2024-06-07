@@ -8,9 +8,6 @@ parso==0.8.4
 platformdirs==4.2.2
 pycodestyle==2.11.1
 pylint==3.2.2
-PyQt5==5.15.10
-PyQt5-Qt5==5.15.13
-PyQt5-sip==12.13.0
 PyQt6==6.7.0
 PyQt6-QScintilla==2.14.1
 PyQt6-Qt6==6.7.0

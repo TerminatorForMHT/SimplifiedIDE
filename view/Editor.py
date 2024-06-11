@@ -1,3 +1,5 @@
+import logging
+
 import autopep8
 from PyQt6.Qsci import QsciScintilla, QsciLexerPython
 from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QStringConverter

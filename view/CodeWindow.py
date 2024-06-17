@@ -2,13 +2,15 @@ import os
 import sys
 from pathlib import PurePath
 
+from PyQt6.Qsci import QsciLexer
 from PyQt6.QtCore import pyqtSlot, QTimer, Qt, QPoint
 from PyQt6.QtGui import QAction, QIcon, QColor
-from PyQt6.QtWidgets import QMainWindow, QTabWidget, QApplication, QFileDialog, QLabel, QDockWidget, QPushButton, \
+from PyQt6.QtWidgets import QMainWindow, QTabWidget, QApplication, QLabel, QDockWidget, QPushButton, \
     QWidget, QMenu, QStackedWidget, QTextEdit, QHBoxLayout
 
 from ui.style_sheet import CodeTabStyleSheet, CodeWindowStyleSheet, ButtonStyleSheet
-from util.config import IMG_PATH, LOAD_FILE_TYPE
+from util.config import IMG_PATH
+from util.lexer import LEXER_MAP
 
 from view.Editor import Editor
 
@@ -24,13 +26,6 @@ class CodeWindow(QMainWindow):
 
         self.setWindowTitle('Code Window Demo')
         self.setStyleSheet(CodeWindowStyleSheet)
-
-        # 添加“打开”菜单项
-        open_action = QAction(QIcon('open_icon.png'), 'Open', self)
-        open_action.triggered.connect(self.open_file)
-
-        self.file_menu = self.menuBar().addMenu('File')
-        self.file_menu.addAction(open_action)
 
         # 创建 QTabWidget
         self.tabs = QTabWidget(self)
@@ -80,7 +75,7 @@ class CodeWindow(QMainWindow):
 
         # 创建状态栏按钮
         self.toggleButton = self.create_status_button('Exclamation.png', self.switch_widget, 0)
-        self.show_log_button = self.create_status_button('code_run.png', self.switch_widget, 1)
+        self.show_log_button = self.create_status_button('run_grey.png', self.switch_widget, 1)
 
         self.__statusBar = self.statusBar()
         self.__statusBar.addPermanentWidget(self.toggleButton)
@@ -102,11 +97,6 @@ class CodeWindow(QMainWindow):
 
     def load_file(self, file_path):
         self.add_file_to_tabs(file_path)
-
-    def open_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, 'Open File', '', LOAD_FILE_TYPE)
-        if file_path:
-            self.add_file_to_tabs(file_path)
 
     def add_file_to_tabs(self, file_path) -> Editor:
         editor = Editor(self.tabs)

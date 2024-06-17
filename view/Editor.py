@@ -1,13 +1,16 @@
 import logging
+from pathlib import PurePath
 
 import autopep8
 from PyQt6.Qsci import QsciScintilla, QsciLexerPython
-from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QStringConverter
-from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont
+from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QStringConverter, QEvent, QPoint
+from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
+from PyQt6.QtWidgets import QApplication
 
 from util.code_check import run_pylint_on_code
-
+from util.config import IMG_PATH
 from util.jediLib import JdeiLib
+from util.lexer import LEXER_MAP
 
 
 class Editor(QsciScintilla):
@@ -17,14 +20,17 @@ class Editor(QsciScintilla):
     ctrl_left_click_signal = pyqtSignal(dict)
 
     def __init__(self, parent):
-        super().__init__(parent)
+        super(Editor, self).__init__(parent)
         self.current_file_path = None
+        self.file_name = None
         self.syntax_errors = []
-        self.init_ui()
         self.init_actions()
 
-    def init_ui(self):
-        lexer = QsciLexerPython()
+        self.setMouseTracking(True)
+        self.viewport().installEventFilter(self)
+        self.underlined_word_range = None
+
+    def init_ui(self, lexer):
         self.setLexer(lexer)
 
         self.setAutoIndent(True)
@@ -52,8 +58,10 @@ class Editor(QsciScintilla):
 
         self.INDICATOR_ERROR = 0
         self.INDICATOR_WARN = 1
+        self.UNDERLINED_WORD = 2
         self.SendScintilla(QsciScintilla.SCI_INDICSETSTYLE, self.INDICATOR_ERROR, QsciScintilla.INDIC_SQUIGGLE)
         self.SendScintilla(QsciScintilla.SCI_INDICSETSTYLE, self.INDICATOR_WARN, QsciScintilla.INDIC_SQUIGGLE)
+        self.SendScintilla(QsciScintilla.SCI_INDICSETUNDER, self.UNDERLINED_WORD, QsciScintilla.INDIC_STRAIGHTBOX)
         self.installEventFilter(self)
 
     def init_actions(self):
@@ -65,6 +73,15 @@ class Editor(QsciScintilla):
 
     def load_file(self, file_path):
         self.current_file_path = file_path
+        file_suffix = file_path.split('.')[-1]
+        lexer = LEXER_MAP.get(f".{file_suffix}", QsciLexerPython)
+        print(lexer)
+        try:
+            self.init_ui(lexer())
+        except Exception as e:
+            self.init_ui(lexer)
+            logging.error(e)
+        self.file_name = file_path.split("/")[-1].rstrip(".py")
         self.setReadOnly("pyi" in file_path)
         file = QFile(file_path)
         if file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
@@ -82,17 +99,18 @@ class Editor(QsciScintilla):
             file.write(self.text())
 
     def mousePressEvent(self, event):
-        if Qt.KeyboardModifier.ControlModifier and event.modifiers():
-            pos = self.SendScintilla(QsciScintilla.SCI_POSITIONFROMPOINT, int(event.position().x()),
-                                     int(event.position().y()))
-            line = self.SendScintilla(QsciScintilla.SCI_LINEFROMPOSITION, pos) + 1
-            index = self.SendScintilla(QsciScintilla.SCI_GETCOLUMN, pos)
-            jedi_lib = JdeiLib(source=self.text(), filename=self.current_file_path)
-            jump_info = {
-                "assign_addr": jedi_lib.getAssignment(line, index),
-                "reference_addr": jedi_lib.getReferences(line, index)
-            }
-            self.ctrl_left_click_signal.emit(jump_info)
+        if Qt.KeyboardModifier.ControlModifier:
+            if event.modifiers():
+                pos = self.SendScintilla(QsciScintilla.SCI_POSITIONFROMPOINT, int(event.position().x()),
+                                         int(event.position().y()))
+                line = self.SendScintilla(QsciScintilla.SCI_LINEFROMPOSITION, pos) + 1
+                index = self.SendScintilla(QsciScintilla.SCI_GETCOLUMN, pos)
+                jedi_lib = JdeiLib(source=self.text(), filename=self.current_file_path)
+                jump_info = {
+                    "assign_addr": jedi_lib.getAssignment(line, index),
+                    "reference_addr": jedi_lib.getReferences(line, index)
+                }
+                self.ctrl_left_click_signal.emit(jump_info)
         super().mousePressEvent(event)
 
     def move_cursor_visible(self, line, index=0):
@@ -140,14 +158,73 @@ class Editor(QsciScintilla):
             self.syntax_errors = run_pylint_on_code(self.current_file_path)
             self.SendScintilla(QsciScintilla.SCI_INDICATORCLEARRANGE)
             for error in self.syntax_errors:
-                if error.get('type') == 'convention':
-                    continue
                 self.add_wavy_underline(error.get('line'), error.get('column'), error.get('endLine'),
-                                        error.get('endColumn'),
-                                        'E' not in error.get('message-id') and 'F' not in error.get('message-id'))
+                                        error.get('endColumn'), 'E' not in error.get('message-id') and
+                                        'F' not in error.get('message-id'))
 
     def get_cursor_pos(self):
         cursor_pos = self.SendScintilla(self.SCI_GETCURRENTPOS)
         cursor_line = self.SendScintilla(self.SCI_LINEFROMPOSITION, cursor_pos)
         cursor_index = cursor_pos - self.SendScintilla(self.SCI_POSITIONFROMLINE, cursor_line)
         return cursor_index, cursor_line
+
+    def contextMenuEvent(self, event):
+        # 获取默认的右键菜单
+        menu = self.createStandardContextMenu()
+
+        # 添加自定义的操作项
+        run_icon = str(IMG_PATH.joinpath(PurePath('run_green.png')))
+        self.code_run_action = QAction(QIcon(run_icon), f"Run {self.file_name}", self)
+        self.code_run_action.triggered.connect(self.code_run)
+        menu.addAction(self.code_run_action)
+
+        # 显示菜单
+        menu.exec(event.globalPos())
+
+    def code_run(self):
+        print('debug_mark_debug'.center(100, '+'))
+
+    def eventFilter(self, obj, event):
+        if obj is self.viewport() and event.type() == QEvent.Type.MouseMove:
+            pos = event.pos()
+            self.handleMouseHover(pos)
+            return True
+        elif obj is self.viewport() and event.type() == QEvent.Type.Leave:
+            self.clearUnderline()
+            return True
+        return super(Editor, self).eventFilter(obj, event)
+
+    def handleMouseHover(self, pos):
+        if QApplication.keyboardModifiers() == Qt.KeyboardModifier.ControlModifier:
+            pos_in_doc = self.positionFromPoint(pos)
+            if pos_in_doc == -1:
+                self.clearUnderline()
+                return
+
+            word_start, word_end = self.getWordBoundary(pos_in_doc)
+            if word_start != -1 and word_end != -1:
+                self.clearUnderline()
+                self.underlineWord(word_start, word_end)
+                self.underlined_word_range = (word_start, word_end)
+        else:
+            self.clearUnderline()
+
+    def positionFromPoint(self, pos):
+        # 将像素位置转换为文本位置
+        return self.SendScintilla(QsciScintilla.SCI_POSITIONFROMPOINT, pos.x(), pos.y())
+
+    def getWordBoundary(self, pos):
+        # 获取指定位置的单词边界
+        start = self.SendScintilla(QsciScintilla.SCI_WORDSTARTPOSITION, pos, True)
+        end = self.SendScintilla(QsciScintilla.SCI_WORDENDPOSITION, pos, True)
+        return start, end
+
+    def underlineWord(self, start, end):
+        self.SendScintilla(QsciScintilla.SCI_INDICSETFORE, self.UNDERLINED_WORD, QColor('blue'))
+        self.SendScintilla(QsciScintilla.SCI_INDICATORFILLRANGE, start, end - start)
+
+    def clearUnderline(self):
+        if self.underlined_word_range:
+            start, end = self.underlined_word_range
+            self.SendScintilla(QsciScintilla.SCI_INDICATORCLEARRANGE, start, end - start)
+            self.underlined_word_range = None

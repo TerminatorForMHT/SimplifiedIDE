@@ -7,20 +7,21 @@ CodeTabStyleSheet = """
             }
             QTabBar::tab {
                 text-align: left;
+                border: 1px solid rgb(0, 0, 0);
+                border-radius: 0px; 
             }
             QTabBar::tab:hover{
                 background-color: rgb(72, 140, 245);
                 color: rgb(255, 255, 255);
-                border-radius: 7px; 
             }
-            QTabBar::close-button {
-                subcontrol-position: right;
+            QTabBar::tab:selected {
+                background-color: rgb(0, 0, 255);
+                color: rgb(255, 255, 255);
             }
             """
 CodeWindowStyleSheet = """
         QMainWindow {
             border: 1px solid #1B1D23;
-            border-radius: 7px; 
         }
         """
 CodeEditorStyleSheet = """

@@ -75,7 +75,6 @@ class Editor(QsciScintilla):
         self.current_file_path = file_path
         file_suffix = file_path.split('.')[-1]
         lexer = LEXER_MAP.get(f".{file_suffix}", QsciLexerPython)
-        print(lexer)
         try:
             self.init_ui(lexer())
         except Exception as e:
@@ -86,16 +85,11 @@ class Editor(QsciScintilla):
         file = QFile(file_path)
         if file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
             stream = QTextStream(file)
-            try:
-                stream.setEncoding(QStringConverter.Encoding.System)
-                self.setText(stream.readAll())
-            except UnicodeDecodeError:
-                stream.setEncoding(QStringConverter.Encoding.Utf8)
-                self.setText(stream.readAll())
+            self.setText(stream.readAll())
             file.close()
 
     def save_file(self):
-        with open(self.current_file_path, 'w') as file:
+        with open(self.current_file_path, 'w',encoding='utf-8') as file:
             file.write(self.text())
 
     def mousePressEvent(self, event):

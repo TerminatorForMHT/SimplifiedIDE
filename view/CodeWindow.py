@@ -51,7 +51,6 @@ class CodeWindow(QMainWindow):
         self.infoDock.setWidget(self.stacked_widget)
 
         self.dock_title = QWidget()
-        self.dock_title.setStyleSheet("background-color: rgb(255, 255, 255)")
         self.dock_title_layout = QHBoxLayout()
         self.dock_title.setLayout(self.dock_title_layout)
         self.dock_title_label = QLabel()
@@ -59,8 +58,9 @@ class CodeWindow(QMainWindow):
         self.dock_title_layout.addStretch()
 
         self.minimize_button = QPushButton()
-        self.minimize_button.setIcon(QIcon(str(IMG_PATH.joinpath(PurePath('minimize.png')))))
+        self.minimize_button.setIcon(QIcon(str(IMG_PATH.joinpath(PurePath('mini_size.png')))))
         self.minimize_button.setFixedSize(20, 20)
+        self.minimize_button.setStyleSheet(ButtonStyleSheet)
         self.minimize_button.clicked.connect(self.dock_hide)
         self.dock_title_layout.addWidget(self.minimize_button)
 
@@ -74,8 +74,8 @@ class CodeWindow(QMainWindow):
         self.dock_show = False
 
         # 创建状态栏按钮
-        self.toggleButton = self.create_status_button('Exclamation.png', self.switch_widget, 0)
-        self.show_log_button = self.create_status_button('run_grey.png', self.switch_widget, 1)
+        self.toggleButton = self.create_status_button('syntax_info.png', self.switch_widget, 0)
+        self.show_log_button = self.create_status_button('code_run.png', self.switch_widget, 1)
 
         self.__statusBar = self.statusBar()
         self.__statusBar.addPermanentWidget(self.toggleButton)

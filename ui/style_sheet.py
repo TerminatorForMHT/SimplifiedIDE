@@ -21,20 +21,21 @@ CodeTabStyleSheet = """
             """
 CodeWindowStyleSheet = """
         QMainWindow {
-            border: 1px solid #1B1D23;
+            border: 0px solid #1B1D23;
         }
         """
 CodeEditorStyleSheet = """
         QsciScintilla {
             border: 1px solid #1B1D23;
             border-radius: 7px; 
+            background-color: palette(window);
         }
         """
 CodeLabelStyleSheet = """
         QLabel{
             font-size: 13px;
             color: black;
-            background-color: rgb(255, 255, 255);
+            background-color: palette(window);
             border: 1px solid black;
             padding: 10px;
         }
@@ -46,6 +47,22 @@ ButtonStyleSheet = """
         border: 0px;
     }
     QPushButton:hover {
-        background-color: rgb(255, 255, 255);
+        background-color: rgb(72, 140, 245);
+    }
+"""
+
+ExitButtonStyleSheet = """
+    QPushButton{
+        background-color: rgba(255, 255, 255, 0);
+        border: 0px;
+    }
+    QPushButton:hover {
+        background-color: rgb(255, 0, 0);
+    }
+"""
+
+TreeStyleSheet = """
+     QTreeView {
+        border-radius: 7px;
     }
 """

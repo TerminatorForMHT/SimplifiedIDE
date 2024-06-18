@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import PurePath
 from venv import logger
@@ -5,9 +6,9 @@ from venv import logger
 from PyQt6.QtCore import pyqtSlot, QTimer, Qt, QPoint
 from PyQt6.QtGui import QAction, QIcon, QColor
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QLabel, QDockWidget, QPushButton, \
-    QWidget, QMenu, QStackedWidget, QTextEdit, QHBoxLayout
+    QWidget, QMenu, QStackedWidget, QTextEdit, QHBoxLayout, QMessageBox
 
-from ui.style_sheet import CodeTabStyleSheet, CodeWindowStyleSheet, ButtonStyleSheet
+from ui.style_sheet import CodeTabStyleSheet, CodeWindowStyleSheet, ButtonStyleSheet, StatusBarStyleSheet
 from util.config import IMG_PATH
 from view.Editor import Editor
 

@@ -73,3 +73,8 @@ TreeStyleSheet = """
         background-color: palette(window);
 }
 """
+StatusBarStyleSheet = """
+    QStatusBar {
+        background-color: palette(window);
+    }
+"""

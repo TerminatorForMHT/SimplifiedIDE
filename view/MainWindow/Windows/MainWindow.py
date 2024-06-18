@@ -1,11 +1,11 @@
-import sys
-
+import json
+import os
 from BlurWindow.blurWindow import GlobalBlur
-from PyQt6.QtCore import Qt, QDir
+from PyQt6.QtCore import Qt, QDir, QSettings
 from PyQt6.QtGui import QAction, QFileSystemModel
 from PyQt6.QtWidgets import (
     QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QTreeView,
-    QMenu, QMessageBox, QInputDialog, QFileDialog, QToolBar, QPushButton, QApplication, QStyle
+    QMenu, QMessageBox, QInputDialog, QFileDialog, QToolBar, QPushButton, QStyle
 )
 
 from ui.style_sheet import TreeStyleSheet, ButtonStyleSheet, ExitButtonStyleSheet
@@ -24,8 +24,14 @@ class MainWindow(QMainWindow):
         GlobalBlur(self.winId(), Dark=True, QWidget=self)
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
 
+        self.history_file = "project_history.json"
+        self.last_opened_file = None
+        self.load_settings()
+
         self.setup_ui()
         self.setup_actions()
+        if self.last_opened_file:
+            self.open_project(self.last_opened_file)
 
     def setup_ui(self):
         self.main_widget = QWidget()
@@ -39,6 +45,8 @@ class MainWindow(QMainWindow):
         self.menubar = self.menuBar()
         self.file_menu = QMenu("文件", self)
         self.menubar.addMenu(self.file_menu)
+        self.project_menu = QMenu("项目", self)
+        self.menubar.addMenu(self.project_menu)
         top_layout.addWidget(self.menubar)
 
         toolbar = QToolBar("Custom Toolbar", self)
@@ -58,6 +66,7 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.splitter)
         self.setCentralWidget(self.main_widget)
 
+        self.display_project_history()
         self.resizeEvent(None)
 
     def setup_toolbar(self, toolbar):
@@ -127,6 +136,9 @@ class MainWindow(QMainWindow):
         folder_path = QFileDialog.getExistingDirectory(self, "Open Folder", QDir.homePath())
         if folder_path:
             self.tree_view.setRootIndex(self.file_system_model.index(folder_path))
+            self.add_project_to_history(os.path.basename(folder_path), folder_path)
+            self.last_opened_file = folder_path
+            self.save_settings()
 
     def on_tree_view_double_clicked(self, index):
         if not self.file_system_model.isDir(index):
@@ -150,3 +162,45 @@ class MainWindow(QMainWindow):
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
         self.activateWindow()
+
+    def load_project_history(self):
+        if os.path.exists(self.history_file):
+            with open(self.history_file, 'r') as file:
+                return json.load(file)
+        return []
+
+    def save_project_history(self):
+        with open(self.history_file, 'w') as file:
+            json.dump(self.project_history, file, indent=4)
+
+    def add_project_to_history(self, name, path):
+        project = {"name": name, "path": path}
+        if project not in self.project_history:
+            self.project_history.append(project)
+            self.save_project_history()
+            self.display_project_history()
+
+    def display_project_history(self):
+        self.project_menu.clear()
+        for project in self.project_history:
+            action = QAction(project['name'], self)
+            action.triggered.connect(lambda checked, path=project['path']: self.open_project(path))
+            self.project_menu.addAction(action)
+
+    def open_project(self, path):
+        if os.path.exists(path):
+            self.tree_view.setRootIndex(self.file_system_model.index(path))
+        else:
+            QMessageBox.warning(self, "Warning", f"The project path {path} does not exist.")
+            self.project_history = [proj for proj in self.project_history if proj['path'] != path]
+            self.save_project_history()
+            self.display_project_history()
+
+    def load_settings(self):
+        settings = QSettings("MyCompany", "MyApp")
+        self.last_opened_file = settings.value("lastOpenedFile")
+        self.project_history = self.load_project_history()
+
+    def save_settings(self):
+        settings = QSettings("MyCompany", "MyApp")
+        settings.setValue("lastOpenedFile", self.last_opened_file)

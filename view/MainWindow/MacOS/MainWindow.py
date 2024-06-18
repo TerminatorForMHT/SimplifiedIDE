@@ -1,4 +1,7 @@
-from PyQt6.QtCore import Qt, QDir
+import json
+import os
+
+from PyQt6.QtCore import Qt, QDir, QSettings
 from PyQt6.QtGui import QAction, QFileSystemModel
 from PyQt6.QtWidgets import QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QTreeView, \
     QMenu, QMessageBox, QInputDialog, QFileDialog
@@ -14,9 +17,17 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("PythonPad ++")
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
+        self.history_file = "project_history.json"
+        self.project_history = self.load_project_history()
+
         self.setup_ui()
         self.setup_menubar()
+        self.display_project_history()
         self.resizeEvent(None)
+        self.last_opened_file = None
+        self.load_settings()
+        if self.last_opened_file:
+            self.open_project(self.last_opened_file)
 
     def setup_ui(self):
         self.main_widget = QWidget()
@@ -61,6 +72,9 @@ class MainWindow(QMainWindow):
         file_menu = QMenu("File", self)
         self.menubar.addMenu(file_menu)
 
+        self.project_menu = QMenu("项目", self)
+        self.menubar.addMenu(self.project_menu)
+
         new_folder_action = QAction("新建项目", self)
         new_folder_action.triggered.connect(self.create_new_folder)
         file_menu.addAction(new_folder_action)
@@ -89,6 +103,9 @@ class MainWindow(QMainWindow):
         folder_path = QFileDialog.getExistingDirectory(self, "Open Folder", QDir.homePath())
         if folder_path:
             self.tree_view.setRootIndex(self.file_system_model.index(folder_path))
+            self.add_project_to_history(os.path.basename(folder_path), folder_path)
+            self.last_opened_file = folder_path
+            self.save_settings()
 
     def on_tree_view_double_clicked(self, index):
         if not self.file_system_model.isDir(index):
@@ -97,3 +114,45 @@ class MainWindow(QMainWindow):
                 self.right_code.load_file(file_path)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to open file: {file_path}\n{str(e)}")
+
+    def load_project_history(self):
+        if os.path.exists(self.history_file):
+            with open(self.history_file, 'r') as file:
+                return json.load(file)
+        return []
+
+    def save_project_history(self):
+        with open(self.history_file, 'w') as file:
+            json.dump(self.project_history, file, indent=4)
+
+    def add_project_to_history(self, name, path):
+        project = {"name": name, "path": path}
+        if project not in self.project_history:
+            self.project_history.append(project)
+            self.save_project_history()
+            self.display_project_history()
+
+    def display_project_history(self):
+        self.project_menu.clear()
+        for project in self.project_history:
+            action = QAction(project['name'], self)
+            action.triggered.connect(lambda checked, path=project['path']: self.open_project(path))
+            self.project_menu.addAction(action)
+
+    def open_project(self, path):
+        if os.path.exists(path):
+            self.tree_view.setRootIndex(self.file_system_model.index(path))
+        else:
+            QMessageBox.warning(self, "Warning", f"The project path {path} does not exist.")
+            self.project_history = [proj for proj in self.project_history if proj['path'] != path]
+            self.save_project_history()
+            self.display_project_history()
+
+    def load_settings(self):
+        settings = QSettings("MyCompany", "MyApp")
+        self.last_opened_file = settings.value("lastOpenedFile")
+        self.project_history = self.load_project_history()
+
+    def save_settings(self):
+        settings = QSettings("MyCompany", "MyApp")
+        settings.setValue("lastOpenedFile", self.last_opened_file)

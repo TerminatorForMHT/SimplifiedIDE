@@ -16,3 +16,4 @@ QScintilla==2.14.1
 tomli==2.0.1
 tomlkit==0.12.5
 BlurWindow==1.2.1
+PyQt6-Fluent-Widgets==1.5.7

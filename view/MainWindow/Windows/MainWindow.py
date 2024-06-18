@@ -190,6 +190,8 @@ class MainWindow(QMainWindow):
     def open_project(self, path):
         if os.path.exists(path):
             self.tree_view.setRootIndex(self.file_system_model.index(path))
+            self.last_opened_file = path
+            self.save_settings()
         else:
             QMessageBox.warning(self, "Warning", f"The project path {path} does not exist.")
             self.project_history = [proj for proj in self.project_history if proj['path'] != path]
@@ -197,10 +199,10 @@ class MainWindow(QMainWindow):
             self.display_project_history()
 
     def load_settings(self):
-        settings = QSettings("MyCompany", "MyApp")
+        settings = QSettings("LastProject", "PythonPad++")
         self.last_opened_file = settings.value("lastOpenedFile")
         self.project_history = self.load_project_history()
 
     def save_settings(self):
-        settings = QSettings("MyCompany", "MyApp")
+        settings = QSettings("LastProject", "PythonPad++")
         settings.setValue("lastOpenedFile", self.last_opened_file)

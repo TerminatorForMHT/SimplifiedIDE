@@ -8,6 +8,7 @@ from PyQt6.QtCore import pyqtSlot, QTimer, Qt, QPoint
 from PyQt6.QtGui import QAction, QIcon, QColor
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QLabel, QDockWidget, QPushButton, \
     QWidget, QMenu, QStackedWidget, QTextEdit, QHBoxLayout, QMessageBox
+from qfluentwidgets import TextEdit
 
 from ui.style_sheet import CodeTabStyleSheet, CodeWindowStyleSheet, ButtonStyleSheet
 from util.config import IMG_PATH
@@ -41,11 +42,13 @@ class CodeWindow(QMainWindow):
 
         self.stacked_widget = QStackedWidget()
 
-        self.info_widget = QTextEdit(self.stacked_widget)
+        self.info_widget = TextEdit(self.stacked_widget)
         self.info_widget.setReadOnly(True)
+        self.info_widget.setStyleSheet("background-color: rgba(0, 0, 0,0)")
         self.info_widget.setTextColor(QColor('black'))
 
-        self.log_widget = QTextEdit(self.stacked_widget)
+        self.log_widget = TextEdit(self.stacked_widget)
+        self.log_widget.setStyleSheet("background-color: rgba(0, 0, 0,0)")
         self.log_widget.setReadOnly(True)
 
         self.stacked_widget.addWidget(self.info_widget)

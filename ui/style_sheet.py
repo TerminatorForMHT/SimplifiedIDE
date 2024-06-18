@@ -22,7 +22,7 @@ CodeTabStyleSheet = """
             """
 CodeWindowStyleSheet = """
         QMainWindow {
-            border: 0px solid #1B1D23;
+            background-color: rgba(0, 0, 0, 0);
         }
         """
 CodeEditorStyleSheet = """

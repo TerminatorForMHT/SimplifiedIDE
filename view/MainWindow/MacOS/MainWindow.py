@@ -5,8 +5,8 @@ from PyQt6.QtCore import Qt, QDir, QSettings
 from PyQt6.QtGui import QAction, QFileSystemModel
 from PyQt6.QtWidgets import QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QTreeView, QMenu, QMessageBox, \
     QInputDialog, QFileDialog
+from qfluentwidgets import TreeView
 
-from ui.style_sheet import TreeStyleSheetForMac
 from view.CodeWindow import CodeWindow
 
 
@@ -15,7 +15,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("PythonPad ++")
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+        # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
         self.history_file = "project_history.json"
         self.project_history = self.load_project_history()
@@ -28,6 +28,7 @@ class MainWindow(QMainWindow):
         self.load_settings()
         if self.last_opened_file:
             self.open_project(self.last_opened_file)
+        self.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
 
     def setup_ui(self):
         self.main_widget = QWidget()
@@ -51,10 +52,10 @@ class MainWindow(QMainWindow):
     def setup_left_widget(self):
         self.left_widget = QWidget()
         left_layout = QVBoxLayout(self.left_widget)
-        self.tree_view = QTreeView()
+        self.tree_view = TreeView()
         self.tree_view.setModel(self.file_system_model)
         self.tree_view.setHeaderHidden(True)
-        self.tree_view.setStyleSheet(TreeStyleSheetForMac)
+        # self.tree_view.setStyleSheet(TreeStyleSheetForMac)
         for i in range(1, 4):
             self.tree_view.setColumnHidden(i, True)
         self.tree_view.setRootIndex(self.file_system_model.index(QDir.rootPath()))

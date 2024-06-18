@@ -15,5 +15,4 @@ PyQt6-sip==13.6.0
 QScintilla==2.14.1
 tomli==2.0.1
 tomlkit==0.12.5
-typing_extensions==4.12.0
-BlurWindow==1.2.1
+pyobjc==10.3.1

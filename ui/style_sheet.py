@@ -61,8 +61,15 @@ ExitButtonStyleSheet = """
     }
 """
 
+TreeStyleSheetForMac = """
+     QTreeView {
+        border-radius: 7px;
+        background-color: palette(window);
+    }
+"""
 TreeStyleSheet = """
      QTreeView {
         border-radius: 7px;
-    }
+        background-color: palette(window);
+}
 """

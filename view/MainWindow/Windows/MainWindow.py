@@ -1,10 +1,10 @@
 from pathlib import PurePath
 
 from BlurWindow.blurWindow import GlobalBlur
+from PyQt6.QtCore import Qt, QDir
 from PyQt6.QtGui import QAction, QFileSystemModel, QIcon
 from PyQt6.QtWidgets import QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QTreeView, \
     QMenu, QMessageBox, QInputDialog, QFileDialog, QToolBar, QPushButton
-from PyQt6.QtCore import Qt, QDir
 
 from ui.style_sheet import TreeStyleSheet, ButtonStyleSheet, ExitButtonStyleSheet
 from util.config import IMG_PATH
@@ -14,12 +14,12 @@ from view.CodeWindow import CodeWindow
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.resize(500, 400)
         self.is_maximized = True
 
         self.setWindowTitle("PythonPad ++")
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.resize(500, 400)
 
         GlobalBlur(self.winId(), Dark=True, QWidget=self)
 

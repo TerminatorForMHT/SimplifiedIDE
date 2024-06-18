@@ -89,8 +89,13 @@ class Editor(QsciScintilla):
             file.close()
 
     def save_file(self):
-        with open(self.current_file_path, 'w',encoding='utf-8') as file:
-            file.write(self.text())
+        try:
+            with open(self.current_file_path, 'w',encoding='utf-8') as file:
+                file.write(self.text())
+        except Exception as e:
+            logging.warning(e)
+        finally:
+            return
 
     def mousePressEvent(self, event):
         if Qt.KeyboardModifier.ControlModifier:

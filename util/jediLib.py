@@ -2,6 +2,8 @@ from venv import logger
 
 import jedi
 
+from util.config import MySettings
+
 
 class JdeiLib:
     def __init__(self, source, filename, project=None):
@@ -142,7 +144,6 @@ class JdeiLib:
         except Exception as err:
             logger.error(str(err))
         return gotoReferences
-
 
     def get_syntax_errors(self):
         ret = []

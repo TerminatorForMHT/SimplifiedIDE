@@ -1,6 +1,7 @@
 CodeTabStyleSheet = """
             QTabWidget {
                 border: 0px solid rgb(0, 0, 0);
+                background-color: rgba(0, 0, 0, 0);
             }
             QTabWidget::tab-bar {
                 alignment: left;
@@ -26,8 +27,9 @@ CodeWindowStyleSheet = """
         """
 CodeEditorStyleSheet = """
         QsciScintilla {
-            border: 1px solid #1B1D23;
-            border-radius: 7px; 
+           background-color: palette(window);
+        }
+        QsciScintilla::viewport {
             background-color: palette(window);
         }
         """

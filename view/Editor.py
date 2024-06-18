@@ -7,6 +7,7 @@ from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent
 from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
 from PyQt6.QtWidgets import QApplication
 
+from ui.style_sheet import CodeEditorStyleSheet
 from util.code_check import run_pylint_on_code
 from util.config import IMG_PATH
 from util.jediLib import JdeiLib
@@ -32,6 +33,7 @@ class Editor(QsciScintilla):
 
     def init_ui(self, lexer):
         self.setLexer(lexer)
+        self.setStyleSheet(CodeEditorStyleSheet)
 
         self.setAutoIndent(True)
         self.setIndentationWidth(4)

@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
 )
 
 from ui.style_sheet import TreeStyleSheet, ButtonStyleSheet, ExitButtonStyleSheet
+from util.config import MySettings
 from view.CodeWindow import CodeWindow
 
 
@@ -45,7 +46,15 @@ class MainWindow(QMainWindow):
         self.menubar = self.menuBar()
         self.file_menu = QMenu("文件", self)
         self.menubar.addMenu(self.file_menu)
-        self.project_menu = QMenu("项目", self)
+        try:
+            project_name = MySettings.value("lastProject")
+            if project_name:
+                self.project_menu = QMenu(project_name, self)
+            else:
+                self.project_menu = QMenu("项目", self)
+            self.project_menu = QMenu(project_name, self)
+        except Exception:
+            self.project_menu = QMenu("项目", self)
         self.menubar.addMenu(self.project_menu)
         top_layout.addWidget(self.menubar)
 
@@ -135,9 +144,13 @@ class MainWindow(QMainWindow):
     def open_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Open Folder", QDir.homePath())
         if folder_path:
+            project_name = os.path.basename(folder_path)
             self.tree_view.setRootIndex(self.file_system_model.index(folder_path))
-            self.add_project_to_history(os.path.basename(folder_path), folder_path)
+            self.add_project_to_history(project_name, folder_path)
             self.last_opened_file = folder_path
+            self.project_name = project_name
+            self.project_menu.setTitle(project_name)
+            MySettings.setValue("project_path", folder_path)
             self.save_settings()
 
     def on_tree_view_double_clicked(self, index):
@@ -191,6 +204,8 @@ class MainWindow(QMainWindow):
         if os.path.exists(path):
             self.tree_view.setRootIndex(self.file_system_model.index(path))
             self.last_opened_file = path
+            self.project_name=os.path.basename(path)
+            self.project_menu.setTitle(self.project_name)
             self.save_settings()
         else:
             QMessageBox.warning(self, "Warning", f"The project path {path} does not exist.")
@@ -199,10 +214,9 @@ class MainWindow(QMainWindow):
             self.display_project_history()
 
     def load_settings(self):
-        settings = QSettings("LastProject", "PythonPad++")
-        self.last_opened_file = settings.value("lastOpenedFile")
+        self.last_opened_file = MySettings.value("lastOpenedFile")
         self.project_history = self.load_project_history()
 
     def save_settings(self):
-        settings = QSettings("LastProject", "PythonPad++")
-        settings.setValue("lastOpenedFile", self.last_opened_file)
+        MySettings.setValue("lastProject", self.project_history)
+        MySettings.setValue("lastOpenedFile", self.last_opened_file)

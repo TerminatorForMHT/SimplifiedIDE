@@ -52,4 +52,5 @@ if __name__ == '__main__':
     app.setWindowIcon(QIcon(ICON))
     w = Demo()
     w.show()
+    w.showMaximized()
     app.exec()

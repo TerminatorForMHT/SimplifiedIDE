@@ -123,7 +123,7 @@ class MainWindow(QMainWindow):
         self.resizeEvent(None)
 
     def resizeEvent(self, event):
-        self.centralWidget().layout().itemAt(1).widget().setSizes([int(self.width() * 0.2), int(self.width() * 0.8)])
+        self.splitter.setSizes([int(self.width() * 0.2), int(self.width() * 0.8)])
         if event:
             super().resizeEvent(event)
 

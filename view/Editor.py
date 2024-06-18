@@ -3,7 +3,7 @@ from pathlib import PurePath
 
 import autopep8
 from PyQt6.Qsci import QsciScintilla, QsciLexerPython
-from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QStringConverter, QEvent, QPoint
+from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent
 from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
 from PyQt6.QtWidgets import QApplication
 

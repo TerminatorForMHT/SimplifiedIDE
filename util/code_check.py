@@ -1,8 +1,9 @@
 import json
 import logging
+from io import StringIO
+
 from pylint.lint import Run
 from pylint.reporters.json_reporter import JSONReporter
-from io import StringIO
 
 from util.config import PYLINTRC_PATH
 

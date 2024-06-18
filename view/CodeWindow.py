@@ -1,17 +1,14 @@
 import os
-import sys
 from pathlib import PurePath
+from venv import logger
 
-from PyQt6.Qsci import QsciLexer
 from PyQt6.QtCore import pyqtSlot, QTimer, Qt, QPoint
 from PyQt6.QtGui import QAction, QIcon, QColor
-from PyQt6.QtWidgets import QMainWindow, QTabWidget, QApplication, QLabel, QDockWidget, QPushButton, \
+from PyQt6.QtWidgets import QMainWindow, QTabWidget, QLabel, QDockWidget, QPushButton, \
     QWidget, QMenu, QStackedWidget, QTextEdit, QHBoxLayout
 
 from ui.style_sheet import CodeTabStyleSheet, CodeWindowStyleSheet, ButtonStyleSheet
 from util.config import IMG_PATH
-from util.lexer import LEXER_MAP
-
 from view.Editor import Editor
 
 
@@ -22,8 +19,11 @@ class CodeWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.infoLabelIsVisible = False
+        self.dock_show = False
+        self.syntax_error = None
+        self.init_ui()
 
+    def init_ui(self):
         self.setWindowTitle('Code Window Demo')
         self.setStyleSheet(CodeWindowStyleSheet)
 
@@ -33,6 +33,8 @@ class CodeWindow(QMainWindow):
         self.tabs.setMovable(True)
         self.tabs.tabCloseRequested.connect(self.closeTab)
         self.tabs.setStyleSheet(CodeTabStyleSheet)
+        self.tabs.currentChanged.connect(self.__resetChangeTimer)
+
         self.setCentralWidget(self.tabs)
 
         self.stacked_widget = QStackedWidget()
@@ -51,6 +53,7 @@ class CodeWindow(QMainWindow):
         self.infoDock.setWidget(self.stacked_widget)
 
         self.dock_title = QWidget()
+        self.dock_title.setStyleSheet("background-color: rgb(255, 255, 255)")
         self.dock_title_layout = QHBoxLayout()
         self.dock_title.setLayout(self.dock_title_layout)
         self.dock_title_label = QLabel()
@@ -60,7 +63,6 @@ class CodeWindow(QMainWindow):
         self.minimize_button = QPushButton()
         self.minimize_button.setIcon(QIcon(str(IMG_PATH.joinpath(PurePath('mini_size.png')))))
         self.minimize_button.setFixedSize(20, 20)
-        self.minimize_button.setStyleSheet(ButtonStyleSheet)
         self.minimize_button.clicked.connect(self.dock_hide)
         self.dock_title_layout.addWidget(self.minimize_button)
 
@@ -71,7 +73,6 @@ class CodeWindow(QMainWindow):
                                   QDockWidget.DockWidgetFeature.DockWidgetFloatable)
         self.infoDock.setAllowedAreas(Qt.DockWidgetArea.BottomDockWidgetArea)
         self.infoDock.hide()
-        self.dock_show = False
 
         # 创建状态栏按钮
         self.toggleButton = self.create_status_button('syntax_info.png', self.switch_widget, 0)
@@ -105,6 +106,7 @@ class CodeWindow(QMainWindow):
         editor.textChanged.connect(self.__resetChangeTimer)
         self.tabs.addTab(editor, file_path.split(os.sep)[-1])
         self.tabs.setCurrentIndex(self.tabs.count() - 1)
+        self.__statusBar.show()
         return editor
 
     def jump_to_assign_tab(self, file_path, line, index):
@@ -118,10 +120,16 @@ class CodeWindow(QMainWindow):
     @pyqtSlot(int)
     def closeTab(self, index):
         editor = self.tabs.widget(index)
-        editor.save_file()
+        try:
+            editor.save_file()
+        except Exception as e:
+            logger.warning(e)
         self.info_widget.setText('')
         self.tabs.removeTab(index)
+        self.dock_hide()
         editor.deleteLater()
+        if self.tabs.count() == 0:
+            self.__statusBar.hide()
 
     def handle_ctrl_left_click(self, addrs: dict):
         assign_addr = addrs.get("assign_addr")
@@ -159,23 +167,28 @@ class CodeWindow(QMainWindow):
         menu.deleteLater()
 
     def check_syntax(self):
-        if self.tabs.currentWidget() and self.dock_show:
+        if self.tabs.currentWidget():
             editor = self.tabs.currentWidget()
             editor.check_code()
             errors, syntax_str = editor.syntax_errors, ""
-            if errors:
-                for error in errors:
-                    flag = "⚠️" if 'E' not in error.get('message-id') and 'F' not in error.get('message-id') else '❗️'
-                    start_line, start_index = error.get('line'), error.get('column')
-                    end_line, end_index = error.get('endLine'), error.get('endColumn')
-                    message_id, message = error.get('message-id'), error.get('message')
-                    symbol = error.get('symbol')
-                    if end_index is not None:
-                        syntax_str += (f'{flag}{message_id:>6}: {message},{symbol}({start_line:}:{start_index:}'
-                                       f'~{end_line:}:{end_index:})\n')
-                    else:
-                        syntax_str += f'{flag}{message_id:>6}: {message},{symbol}({start_line:})\n'
-                self.info_widget.setText(syntax_str)
+            if errors != self.syntax_error:
+                if errors:
+                    self.syntax_error = errors
+                    for error in errors:
+                        flag = "⚠️" if 'E' not in error.get('message-id') and 'F' not in error.get(
+                            'message-id') else '❗️'
+                        start_line, start_index = error.get('line'), error.get('column')
+                        end_line, end_index = error.get('endLine'), error.get('endColumn')
+                        message_id, message = error.get('message-id'), error.get('message')
+                        symbol = error.get('symbol')
+                        if end_index is not None:
+                            syntax_str += (f'{flag}{message_id:>6}: {message},{symbol}({start_line:}:{start_index:}'
+                                           f'~{end_line:}:{end_index:})\n')
+                        else:
+                            syntax_str += f'{flag}{message_id:>6}: {message},{symbol}({start_line:})\n'
+                    self.info_widget.setText(syntax_str)
+            else:
+                self.__changeTimer.stop()
 
     def __resetChangeTimer(self):
         self.__changeTimer.stop()
@@ -189,7 +202,7 @@ class CodeWindow(QMainWindow):
         if not self.dock_show:
             self.infoDock.show()
             self.dock_show = True
-        else:
+        elif self.stacked_widget.currentIndex() == index:
             self.infoDock.hide()
             self.dock_show = False
         self.stacked_widget.setCurrentIndex(index)
@@ -197,12 +210,3 @@ class CodeWindow(QMainWindow):
     def dock_hide(self):
         self.infoDock.hide()
         self.dock_show = False
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-
-    main_window = CodeWindow()
-    main_window.showMaximized()
-
-    sys.exit(app.exec())

@@ -1,7 +1,3 @@
-from ctypes import c_void_p
-
-import Quartz
-import objc
 from PyQt6.QtCore import Qt, QDir
 from PyQt6.QtGui import QAction, QFileSystemModel
 from PyQt6.QtWidgets import QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QTreeView, \
@@ -84,6 +80,7 @@ class MainWindow(QMainWindow):
 
     def resizeEvent(self, event):
         self.centralWidget().layout().itemAt(0).widget().setSizes([int(self.width() * 0.2), int(self.width() * 0.8)])
+        print(self.centralWidget().layout().itemAt(0).widget().__dict__)
         if event:
             super().resizeEvent(event)
 

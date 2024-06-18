@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 from pathlib import PurePath
 from venv import logger
 
@@ -8,7 +9,7 @@ from PyQt6.QtGui import QAction, QIcon, QColor
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QLabel, QDockWidget, QPushButton, \
     QWidget, QMenu, QStackedWidget, QTextEdit, QHBoxLayout, QMessageBox
 
-from ui.style_sheet import CodeTabStyleSheet, CodeWindowStyleSheet, ButtonStyleSheet, StatusBarStyleSheet
+from ui.style_sheet import CodeTabStyleSheet, CodeWindowStyleSheet, ButtonStyleSheet
 from util.config import IMG_PATH
 from view.Editor import Editor
 
@@ -54,7 +55,8 @@ class CodeWindow(QMainWindow):
         self.infoDock.setWidget(self.stacked_widget)
 
         self.dock_title = QWidget()
-        self.dock_title.setStyleSheet("background-color: rgb(255, 255, 255)")
+        if platform.system() == 'Darwin':
+            self.dock_title.setStyleSheet("background-color: rgb(255, 255, 255)")
         self.dock_title_layout = QHBoxLayout()
         self.dock_title.setLayout(self.dock_title_layout)
         self.dock_title_label = QLabel()
@@ -62,6 +64,7 @@ class CodeWindow(QMainWindow):
         self.dock_title_layout.addStretch()
 
         self.minimize_button = QPushButton()
+        self.minimize_button.setStyleSheet(ButtonStyleSheet)
         self.minimize_button.setIcon(QIcon(str(IMG_PATH.joinpath(PurePath('mini_size.png')))))
         self.minimize_button.setFixedSize(20, 20)
         self.minimize_button.clicked.connect(self.dock_hide)

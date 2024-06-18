@@ -70,7 +70,6 @@ TreeStyleSheetForMac = """
 TreeStyleSheet = """
      QTreeView {
         border-radius: 7px;
-        background-color: palette(window);
 }
 """
 StatusBarStyleSheet = """

@@ -4,8 +4,8 @@ from BlurWindow.blurWindow import GlobalBlur
 from PyQt6.QtCore import Qt, QDir, QSettings
 from PyQt6.QtGui import QAction, QFileSystemModel
 from PyQt6.QtWidgets import (
-    QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QTreeView,
-    QMenu, QMessageBox, QInputDialog, QFileDialog, QToolBar, QPushButton, QStyle
+    QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QTreeView, QMenu, QMessageBox, QInputDialog, QFileDialog,
+    QToolBar, QPushButton, QStyle
 )
 
 from ui.style_sheet import TreeStyleSheet, ButtonStyleSheet, ExitButtonStyleSheet

@@ -3,8 +3,8 @@ import os
 
 from PyQt6.QtCore import Qt, QDir, QSettings
 from PyQt6.QtGui import QAction, QFileSystemModel
-from PyQt6.QtWidgets import QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QTreeView, \
-    QMenu, QMessageBox, QInputDialog, QFileDialog
+from PyQt6.QtWidgets import QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QTreeView, QMenu, QMessageBox, \
+    QInputDialog, QFileDialog
 
 from ui.style_sheet import TreeStyleSheetForMac
 from view.CodeWindow import CodeWindow

@@ -1,6 +1,6 @@
 CodeTabStyleSheet = """
         QTabWidget::pane {
-            background-color: rgba(255, 255, 255, 0);
+            background-color: rgb(255, 255, 255,0);
         }
         
         QTabWidget::tab-bar {
@@ -10,7 +10,6 @@ CodeTabStyleSheet = """
         QTabBar::tab {
             text-align: left;
             background: #e1e1e1;
-            border: 1px solid #ccc;
             padding: 5px;
             color: #333;
         }
@@ -49,22 +48,22 @@ CodeTabStyleSheet = """
 """
 CodeWindowStyleSheet = """
         QMainWindow {
-            background-color: rgba(255, 255, 255, 0);
+            background-color: rgba(255, 255, 255,0);
+            border-radius: 7px;
+            margin: 2px;
         }
         """
 CodeEditorStyleSheet = """
         QsciScintilla {
-           background-color: rgba(255, 255, 255, 0);
-        }
-        QsciScintilla::viewport {
-            background-color: rgba(255, 255, 255, 0);
+           background-color: rgba(0, 0, 0, 0);
+           margin: 2px;
         }
         """
 CodeLabelStyleSheet = """
         QLabel{
             font-size: 13px;
             color: black;
-            background-color: rgba(255, 255, 255, 0);
+            background-color: rgb(255, 255, 255);
             padding: 10px;
         }
 """

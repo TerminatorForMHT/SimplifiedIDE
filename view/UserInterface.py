@@ -61,6 +61,10 @@ class UserInterface(QMainWindow):
 
     def setup_right_widget(self):
         self.right_widget = QWidget()
+        self.right_widget.setStyleSheet("""
+        background-color: rgb(255, 255, 255);
+        border-radius: 7px;
+        """)
         right_layout = QVBoxLayout(self.right_widget)
         self.right_code = CodeWindow()
         right_layout.addWidget(self.right_code)

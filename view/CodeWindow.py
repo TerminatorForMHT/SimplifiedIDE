@@ -58,9 +58,9 @@ class CodeWindow(QMainWindow):
         self.infoDock = QDockWidget("Info Dock", self)
         self.infoDock.setWidget(self.stacked_widget)
         self.infoDock.setStyleSheet("""
-        background-color: #ffffff;
-        border: 1px solid #f0f0f0;
-        border-radius: 7px;
+            background-color: #ffffff;
+            border: 1px solid #f0f0f0;
+            border-radius: 7px;
         """)
 
         self.dock_title = DockTitleBar(self.infoDock)

@@ -142,7 +142,7 @@ class Editor(QsciScintilla):
 
     def handle_wheel_event(self, event):
         if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
-            self.zoomIn() if event.angleDelta().y() > 0 else self.zoomOut()
+            self.zoomIn() if event.pixelDelta().y() > 0 else self.zoomOut()
             event.accept()
         else:
             QsciScintilla.wheelEvent(self, event)

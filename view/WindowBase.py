@@ -39,8 +39,7 @@ class WindowBase(BackgroundAnimationWidget, FramelessWindow):
 
         self.titleBar.raise_()
 
-    def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
-                        position=NavigationItemPosition.TOP, parent=None, isTransparent=False) -> None:
+    def addSubInterface(self, interface: QWidget, parent=None, isTransparent=False) -> None:
         """ add sub interface, the object name of `interface` should be set already
         before calling this method
 
@@ -48,15 +47,6 @@ class WindowBase(BackgroundAnimationWidget, FramelessWindow):
         ----------
         interface: QWidget
             the subinterface to be added
-
-        icon: FluentIconBase | QIcon | str
-            the icon of navigation item
-
-        text: str
-            the text of navigation item
-
-        position: NavigationItemPosition
-            the position of navigation item
 
         parent: QWidget
             the parent of navigation item

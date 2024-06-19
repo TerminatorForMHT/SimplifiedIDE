@@ -103,7 +103,7 @@ class CodeWindow(QMainWindow):
         editor.load_file(file_path)
         editor.ctrl_left_click_signal.connect(self.handle_ctrl_left_click)
         editor.textChanged.connect(self.__resetChangeTimer)
-        self.tabs.addTab(editor, file_path.split(os.sep)[-1])
+        self.tabs.addTab(editor, file_path.split('/')[-1])
         self.tabs.setCurrentIndex(self.tabs.count() - 1)
         self.__statusBar.show()
         return editor

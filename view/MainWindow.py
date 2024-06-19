@@ -39,7 +39,7 @@ class MainWindow(WindowBase):
 
         self.user_interface = UserInterface()
         self.user_interface.setObjectName('UserInterface')
-        self.addSubInterface(self.user_interface, FIF.HOME, 'Home')
+        self.addSubInterface(self.user_interface)
 
     def createSubInterface(self):
         loop = QEventLoop(self)

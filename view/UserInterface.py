@@ -1,11 +1,13 @@
 import json
 import os
+import sys
 
 from PyQt6.QtCore import Qt, QDir
 from PyQt6.QtGui import QAction, QFileSystemModel
 from PyQt6.QtWidgets import QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QMenu, QMessageBox, \
     QInputDialog, QFileDialog
-from qfluentwidgets import TreeView
+from qfluentwidgets import TreeView, FluentIcon, DropDownPushButton, RoundMenu, Action
+from qfluentwidgets.components.material import AcrylicMenu
 
 from util.config import MySettings
 from view.CodeWindow import CodeWindow
@@ -17,21 +19,24 @@ class UserInterface(QMainWindow):
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
         self.history_file = "project_history.json"
         self.project_history = self.load_project_history()
+        self.main_widget = QWidget()
+        self.main_layout = QVBoxLayout(self.main_widget)
 
-        self.setup_ui()
         self.setup_menubar()
+        self.setup_ui()
+        if sys.platform != 'darwin':
+            self.top_project_button.hide()
         self.display_project_history()
         self.resizeEvent(None)
         self.last_opened_file = None
         self.load_settings()
         if self.last_opened_file:
             self.open_project(self.last_opened_file)
+            if sys.platform != 'darwin':
+                self.top_project_button.show()
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
 
     def setup_ui(self):
-        self.main_widget = QWidget()
-        main_layout = QHBoxLayout(self.main_widget)
-
         self.file_system_model = QFileSystemModel()
         self.file_system_model.setRootPath(QDir.rootPath())
 
@@ -44,7 +49,7 @@ class UserInterface(QMainWindow):
         self.splitter.addWidget(self.right_widget)
         self.splitter.setSizes([int(self.width() * 0.2), int(self.width() * 0.8)])
 
-        main_layout.addWidget(self.splitter)
+        self.main_layout.addWidget(self.splitter)
         self.setCentralWidget(self.main_widget)
 
     def setup_left_widget(self):
@@ -69,7 +74,32 @@ class UserInterface(QMainWindow):
         self.right_code = CodeWindow()
         right_layout.addWidget(self.right_code)
 
-    def setup_menubar(self):
+    def setup_menubar_no_mac(self):
+        self.top_widget = QWidget()
+        self.top_widget.setFixedHeight(50)
+        self.top_widget.setFixedWidth(260)
+        self.top_layout = QHBoxLayout()
+        self.top_widget.setLayout(self.top_layout)
+
+        self.top_file_button = DropDownPushButton(FluentIcon.FOLDER, "文件")
+        file_menu = RoundMenu("文件", self.top_file_button)
+        file_menu.setIcon(FluentIcon.FOLDER)
+        file_menu.addAction(Action(FluentIcon.FOLDER, '新建项目', triggered=self.create_new_folder))
+        file_menu.addAction(Action(FluentIcon.FOLDER, '打开项目', triggered=self.open_folder))
+        self.top_file_button.setMenu(file_menu)
+        self.top_layout.addWidget(self.top_file_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.top_layout.setContentsMargins(30, 0, 0, 0)
+
+        self.top_project_button = DropDownPushButton(FluentIcon.PROJECTOR, "项目")
+        self.project_menu = RoundMenu('项目', self.top_project_button)
+        self.project_menu.setIcon(FluentIcon.PROJECTOR)
+        self.top_project_button.setMenu(self.project_menu)
+        self.top_layout.addWidget(self.top_project_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.top_project_button.setContentsMargins(160, 0, 0, 0)
+        self.top_layout.setSpacing(0)
+        self.main_layout.addWidget(self.top_widget)
+
+    def setup_menubar_mac(self):
         self.menubar = self.menuBar()
         file_menu = QMenu("文件", self)
         self.menubar.addMenu(file_menu)
@@ -91,6 +121,12 @@ class UserInterface(QMainWindow):
         open_folder_action = QAction("打开项目", self)
         open_folder_action.triggered.connect(self.open_folder)
         file_menu.addAction(open_folder_action)
+
+    def setup_menubar(self):
+        if sys.platform != 'darwin':
+            self.setup_menubar_no_mac()
+        else:
+            self.setup_menubar_mac()
 
     def resizeEvent(self, event):
         self.splitter.setSizes([int(self.width() * 0.2), int(self.width() * 0.8)])
@@ -115,8 +151,6 @@ class UserInterface(QMainWindow):
             self.tree_view.setRootIndex(self.file_system_model.index(folder_path))
             self.add_project_to_history(project_name, folder_path)
             self.last_opened_file = folder_path
-            self.project_name = project_name
-            self.project_menu.setTitle(project_name)
             MySettings.setValue("project_path", folder_path)
             self.save_settings()
 
@@ -148,16 +182,13 @@ class UserInterface(QMainWindow):
     def display_project_history(self):
         self.project_menu.clear()
         for project in self.project_history:
-            action = QAction(project['name'], self)
-            action.triggered.connect(lambda checked, path=project['path']: self.open_project(path))
-            self.project_menu.addAction(action)
+            self.project_menu.addAction(Action(FluentIcon.PROJECTOR, project['name'],
+                                               triggered=lambda checked, path=project['path']: self.open_project(path)))
 
     def open_project(self, path):
         if os.path.exists(path):
             self.tree_view.setRootIndex(self.file_system_model.index(path))
             self.last_opened_file = path
-            self.project_name = os.path.basename(path)
-            self.project_menu.setTitle(self.project_name)
             self.save_settings()
         else:
             QMessageBox.warning(self, "Warning", f"The project path {path} does not exist.")

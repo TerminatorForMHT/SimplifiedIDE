@@ -1,6 +1,6 @@
 CodeTabStyleSheet = """
         QTabWidget::pane {
-            background-color: rgb(255, 255, 255,0);
+            background-color: rgb(255, 255, 255, 0);
         }
         
         QTabWidget::tab-bar {

@@ -11,7 +11,7 @@ from util.config import IMG_PATH
 from view.UserInterface import UserInterface
 from view.WindowBase import WindowBase
 
-ICON = str(IMG_PATH.joinpath(PurePath('star_of_life.png')))
+ICON = str(IMG_PATH.joinpath(PurePath('snake.svg')))
 
 
 class MainWindow(WindowBase):

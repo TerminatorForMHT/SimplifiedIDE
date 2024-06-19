@@ -1,22 +1,20 @@
 import json
 import os
 
-from PyQt6.QtCore import Qt, QDir, QSettings
+from PyQt6.QtCore import Qt, QDir
 from PyQt6.QtGui import QAction, QFileSystemModel
-from PyQt6.QtWidgets import QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QTreeView, QMenu, QMessageBox, \
+from PyQt6.QtWidgets import QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QMenu, QMessageBox, \
     QInputDialog, QFileDialog
 from qfluentwidgets import TreeView
 
+from util.config import MySettings
 from view.CodeWindow import CodeWindow
 
 
-class MainWindow(QMainWindow):
+class UserInterface(QMainWindow):
     def __init__(self):
         super().__init__()
-
-        self.setWindowTitle("PythonPad ++")
-        # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
-
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
         self.history_file = "project_history.json"
         self.project_history = self.load_project_history()
 
@@ -55,7 +53,6 @@ class MainWindow(QMainWindow):
         self.tree_view = TreeView()
         self.tree_view.setModel(self.file_system_model)
         self.tree_view.setHeaderHidden(True)
-        # self.tree_view.setStyleSheet(TreeStyleSheetForMac)
         for i in range(1, 4):
             self.tree_view.setColumnHidden(i, True)
         self.tree_view.setRootIndex(self.file_system_model.index(QDir.rootPath()))
@@ -70,10 +67,17 @@ class MainWindow(QMainWindow):
 
     def setup_menubar(self):
         self.menubar = self.menuBar()
-        file_menu = QMenu("File", self)
+        file_menu = QMenu("文件", self)
         self.menubar.addMenu(file_menu)
-
-        self.project_menu = QMenu("项目", self)
+        try:
+            project_name = MySettings.value("lastProject")
+            if project_name:
+                self.project_menu = QMenu(project_name, self)
+            else:
+                self.project_menu = QMenu("项目", self)
+            self.project_menu = QMenu(project_name, self)
+        except Exception:
+            self.project_menu = QMenu("项目", self)
         self.menubar.addMenu(self.project_menu)
 
         new_folder_action = QAction("新建项目", self)
@@ -103,9 +107,13 @@ class MainWindow(QMainWindow):
     def open_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Open Folder", QDir.homePath())
         if folder_path:
+            project_name = os.path.basename(folder_path)
             self.tree_view.setRootIndex(self.file_system_model.index(folder_path))
-            self.add_project_to_history(os.path.basename(folder_path), folder_path)
+            self.add_project_to_history(project_name, folder_path)
             self.last_opened_file = folder_path
+            self.project_name = project_name
+            self.project_menu.setTitle(project_name)
+            MySettings.setValue("project_path", folder_path)
             self.save_settings()
 
     def on_tree_view_double_clicked(self, index):
@@ -144,6 +152,8 @@ class MainWindow(QMainWindow):
         if os.path.exists(path):
             self.tree_view.setRootIndex(self.file_system_model.index(path))
             self.last_opened_file = path
+            self.project_name = os.path.basename(path)
+            self.project_menu.setTitle(self.project_name)
             self.save_settings()
         else:
             QMessageBox.warning(self, "Warning", f"The project path {path} does not exist.")
@@ -152,10 +162,9 @@ class MainWindow(QMainWindow):
             self.display_project_history()
 
     def load_settings(self):
-        settings = QSettings("LastProject", "PythonPad++")
-        self.last_opened_file = settings.value("lastOpenedFile")
+        self.last_opened_file = MySettings.value("lastOpenedFile")
         self.project_history = self.load_project_history()
 
     def save_settings(self):
-        settings = QSettings("LastProject", "PythonPad++")
-        settings.setValue("lastOpenedFile", self.last_opened_file)
+        MySettings.setValue("lastProject", self.project_history)
+        MySettings.setValue("lastOpenedFile", self.last_opened_file)

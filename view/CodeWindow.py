@@ -1,17 +1,17 @@
-import json
 import os
-import platform
 from pathlib import PurePath
 from venv import logger
 
 from PyQt6.QtCore import pyqtSlot, QTimer, Qt, QPoint
 from PyQt6.QtGui import QAction, QIcon, QColor
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QLabel, QDockWidget, QPushButton, \
-    QWidget, QMenu, QStackedWidget, QTextEdit, QHBoxLayout, QMessageBox
-from qfluentwidgets import TextEdit
+    QWidget, QMenu, QStackedWidget, QHBoxLayout, QStyle
+from qfluentwidgets import TextEdit, ToolButton, FluentTitleBar
+from qframelesswindow import TitleBarBase
 
 from ui.style_sheet import CodeTabStyleSheet, CodeWindowStyleSheet, ButtonStyleSheet
 from util.config import IMG_PATH
+from view.DockTitleBar import DockTitleBar
 from view.Editor import Editor
 
 
@@ -25,6 +25,7 @@ class CodeWindow(QMainWindow):
         self.dock_show = False
         self.syntax_error = None
         self.init_ui()
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
 
     def init_ui(self):
         self.setWindowTitle('Code Window Demo')
@@ -56,23 +57,14 @@ class CodeWindow(QMainWindow):
 
         self.infoDock = QDockWidget("Info Dock", self)
         self.infoDock.setWidget(self.stacked_widget)
+        self.infoDock.setStyleSheet("""
+        background-color: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 7px;
+        """)
 
-        self.dock_title = QWidget()
-        if platform.system() == 'Darwin':
-            self.dock_title.setStyleSheet("background-color: rgb(255, 255, 255)")
-        self.dock_title_layout = QHBoxLayout()
-        self.dock_title.setLayout(self.dock_title_layout)
-        self.dock_title_label = QLabel()
-        self.dock_title_layout.addWidget(self.dock_title_label)
-        self.dock_title_layout.addStretch()
-
-        self.minimize_button = QPushButton()
-        self.minimize_button.setStyleSheet(ButtonStyleSheet)
-        self.minimize_button.setIcon(QIcon(str(IMG_PATH.joinpath(PurePath('mini_size.png')))))
-        self.minimize_button.setFixedSize(20, 20)
-        self.minimize_button.clicked.connect(self.dock_hide)
-        self.dock_title_layout.addWidget(self.minimize_button)
-
+        self.dock_title = DockTitleBar(self.infoDock)
+        self.dock_title.setMinBtn(self.dock_hide)
         self.infoDock.setTitleBarWidget(self.dock_title)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.infoDock)
 

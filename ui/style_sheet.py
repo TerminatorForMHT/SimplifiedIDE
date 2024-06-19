@@ -1,44 +1,70 @@
 CodeTabStyleSheet = """
-            QTabWidget {
-                border: 0px solid rgb(0, 0, 0);
-                background-color: rgba(0, 0, 0, 0);
-            }
-            QTabWidget::tab-bar {
-                alignment: left;
-            }
-            QTabBar::tab {
-                text-align: left;
-                border: 1px solid rgb(0, 0, 0);
-                border-radius: 0px; 
-            }
-            QTabBar::tab:hover{
-                background-color: rgb(72, 140, 245);
-                color: rgb(255, 255, 255);
-            }
-            QTabBar::tab:selected {
-                background-color: rgb(0, 0, 255);
-                color: rgb(255, 255, 255);
-            }
-            """
+        QTabWidget::pane {
+            background-color: rgba(255, 255, 255, 0);
+        }
+        
+        QTabWidget::tab-bar {
+            alignment: left;
+        }
+
+        QTabBar::tab {
+            text-align: left;
+            background: #e1e1e1;
+            border: 1px solid #ccc;
+            padding: 5px;
+            color: #333;
+        }
+
+        QTabBar::tab:selected {
+            background: #ffffff;
+            color: #000;
+            border-bottom: 2px solid #0078d7;
+        }
+
+        QTabBar::tab:hover {
+            background: #f0f0f0;
+        }
+
+        QTabBar::tab:!selected {
+            margin-top: 2px;
+        }
+
+        QTabBar::tab:only-one {
+            margin: 0;
+        }
+        
+        QTabBar::close-button {
+            subcontrol-position: right;
+        }
+
+        QTabBar::close-button:hover {
+            background: #e81123;
+            border-radius: 3px;
+        }
+
+        QTabBar::close-button:pressed {
+            background: #c50f1f;
+            border-radius: 3px;
+        }
+"""
 CodeWindowStyleSheet = """
         QMainWindow {
-            background-color: rgba(0, 0, 0, 0);
+            background-color: rgba(255, 255, 255, 0);
         }
         """
 CodeEditorStyleSheet = """
         QsciScintilla {
-           background-color: palette(window);
+           background-color: rgba(255, 255, 255, 0);
         }
         QsciScintilla::viewport {
-            background-color: palette(window);
+            background-color: rgba(255, 255, 255, 0);
         }
         """
 CodeLabelStyleSheet = """
         QLabel{
             font-size: 13px;
             color: black;
-            background-color: palette(window);
-            border: 1px solid black;
+            background-color: rgba(255, 255, 255, 0);
             padding: 10px;
         }
 """
@@ -63,12 +89,6 @@ ExitButtonStyleSheet = """
     }
 """
 
-TreeStyleSheetForMac = """
-     QTreeView {
-        border-radius: 7px;
-        background-color: palette(window);
-    }
-"""
 TreeStyleSheet = """
      QTreeView {
         border-radius: 7px;
@@ -76,6 +96,6 @@ TreeStyleSheet = """
 """
 StatusBarStyleSheet = """
     QStatusBar {
-        background-color: palette(window);
+        background-color: rgba(255, 255, 255, 0);
     }
 """

@@ -5,16 +5,18 @@ from pathlib import PurePath
 from PyQt6.QtCore import QTimer, QEventLoop, QSize
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication
-from qfluentwidgets import SplashScreen, FluentWindow
+from qfluentwidgets import SplashScreen
 
 from util.config import IMG_PATH
-from view.MainWindow.MacOS.MainWindow import MainWindow
 from qfluentwidgets import FluentIcon as FIF
+
+from view.UserInterface import UserInterface
+from view.WindowBase import WindowBase
 
 ICON = str(IMG_PATH.joinpath(PurePath('star_of_life.png')))
 
 
-class Demo(FluentWindow):
+class MainWindow(WindowBase):
 
     def __init__(self):
         super().__init__()
@@ -35,11 +37,9 @@ class Demo(FluentWindow):
         # 4. 隐藏启动页面
         self.splashScreen.finish()
 
-
-        self.main_window = MainWindow()
-        self.main_window.setObjectName('MainWindow')
-        self.addSubInterface(self.main_window, FIF.HOME, 'Home')
-        self.navigationInterface.hide()
+        self.user_interface = UserInterface()
+        self.user_interface.setObjectName('UserInterface')
+        self.addSubInterface(self.user_interface, FIF.HOME, 'Home')
 
     def createSubInterface(self):
         loop = QEventLoop(self)
@@ -50,7 +50,7 @@ class Demo(FluentWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(ICON))
-    w = Demo()
+    w = MainWindow()
     w.show()
     w.showMaximized()
     app.exec()

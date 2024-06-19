@@ -6,6 +6,7 @@ from PyQt6.Qsci import QsciScintilla, QsciLexerPython
 from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent
 from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
 from PyQt6.QtWidgets import QApplication
+from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont
 
 from ui.style_sheet import CodeEditorStyleSheet
 from util.code_check import run_pylint_on_code
@@ -22,6 +23,10 @@ class Editor(QsciScintilla):
 
     def __init__(self, parent):
         super(Editor, self).__init__(parent)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scrollDelegate = SmoothScrollDelegate(self)
+
         self.current_file_path = None
         self.file_name = None
         self.syntax_errors = []
@@ -30,6 +35,9 @@ class Editor(QsciScintilla):
         self.setMouseTracking(True)
         self.viewport().installEventFilter(self)
         self.underlined_word_range = None
+
+        FluentStyleSheet.LINE_EDIT.apply(self)
+        setFont(self)
 
     def init_ui(self, lexer):
         self.setLexer(lexer)
@@ -40,12 +48,17 @@ class Editor(QsciScintilla):
         self.setIndentationsUseTabs(True)
         self.setTabIndents(True)
         self.setFolding(QsciScintilla.FoldStyle.BoxedTreeFoldStyle)
+        self.setFoldMarginColors(QColor("#F3F3F3"), QColor("#F3F3F3"))
         self.setMarginType(2, QsciScintilla.MarginType.SymbolMargin)
         self.setIndentationGuides(True)
         self.setMarginType(1, QsciScintilla.MarginType.NumberMargin)
         self.setMarginsFont(QFont("Courier", 10))
-        self.setMarginsBackgroundColor(QColor("#cccccc"))
-        self.setMarginLineNumbers(1, True)
+        self.setMarginsBackgroundColor(QColor("#FFFFFF"))
+        self.setMarginsForegroundColor(QColor("#333333"))
+        self.setMarginSensitivity(1, True)
+        self.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
+
+        self.setMarginLineNumbers(0, True)
         self.setMarginWidth(1, "0000")
         self.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAll)
         self.setAutoCompletionThreshold(1)
@@ -56,7 +69,7 @@ class Editor(QsciScintilla):
         self.setEdgeColumn(80)
         self.setEdgeColor(QColor("#bebebe"))
         self.setCaretLineVisible(True)
-        self.setCaretLineBackgroundColor(QColor("#e4e4e4"))
+        self.setCaretLineBackgroundColor(QColor("#F3F3F3"))
 
         self.INDICATOR_ERROR = 0
         self.INDICATOR_WARN = 1
@@ -65,6 +78,14 @@ class Editor(QsciScintilla):
         self.SendScintilla(QsciScintilla.SCI_INDICSETSTYLE, self.INDICATOR_WARN, QsciScintilla.INDIC_SQUIGGLE)
         self.SendScintilla(QsciScintilla.SCI_INDICSETUNDER, self.UNDERLINED_WORD, QsciScintilla.INDIC_STRAIGHTBOX)
         self.installEventFilter(self)
+
+        self.markerDefine(QsciScintilla.MarkerSymbol.Minus, QsciScintilla.SC_MARKNUM_FOLDEROPEN)
+        self.markerDefine(QsciScintilla.MarkerSymbol.Plus, QsciScintilla.SC_MARKNUM_FOLDER)
+
+        self.setMarkerBackgroundColor(QColor("#0078D7"), QsciScintilla.SC_MARKNUM_FOLDER)
+        self.setMarkerForegroundColor(QColor("#FFFFFF"), QsciScintilla.SC_MARKNUM_FOLDER)
+        self.setMarkerBackgroundColor(QColor("#0078D7"), QsciScintilla.SC_MARKNUM_FOLDEROPEN)
+        self.setMarkerForegroundColor(QColor("#FFFFFF"), QsciScintilla.SC_MARKNUM_FOLDEROPEN)
 
     def init_actions(self):
         self.save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
@@ -92,7 +113,7 @@ class Editor(QsciScintilla):
 
     def save_file(self):
         try:
-            with open(self.current_file_path, 'w',encoding='utf-8') as file:
+            with open(self.current_file_path, 'w', encoding='utf-8') as file:
                 file.write(self.text())
         except Exception as e:
             logging.warning(e)

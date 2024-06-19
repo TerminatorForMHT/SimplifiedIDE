@@ -4,10 +4,9 @@ from venv import logger
 
 from PyQt6.QtCore import pyqtSlot, QTimer, Qt, QPoint
 from PyQt6.QtGui import QAction, QIcon, QColor
-from PyQt6.QtWidgets import QMainWindow, QTabWidget, QLabel, QDockWidget, QPushButton, \
-    QWidget, QMenu, QStackedWidget, QHBoxLayout, QStyle
-from qfluentwidgets import TextEdit, ToolButton, FluentTitleBar
-from qframelesswindow import TitleBarBase
+from PyQt6.QtWidgets import QMainWindow, QTabWidget, QDockWidget, QPushButton, \
+    QMenu, QStackedWidget
+from qfluentwidgets import TextEdit
 
 from ui.style_sheet import CodeTabStyleSheet, CodeWindowStyleSheet, ButtonStyleSheet
 from util.config import IMG_PATH

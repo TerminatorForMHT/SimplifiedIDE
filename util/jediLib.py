@@ -2,8 +2,6 @@ from venv import logger
 
 import jedi
 
-from util.config import MySettings
-
 
 class JdeiLib:
     def __init__(self, source, filename, project=None):

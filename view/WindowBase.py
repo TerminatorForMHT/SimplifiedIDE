@@ -1,10 +1,9 @@
 import sys
-from typing import Union
 
-from PyQt6.QtCore import Qt, QEvent
-from PyQt6.QtGui import QColor, QIcon, QPainter
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor, QPainter
 from PyQt6.QtWidgets import QHBoxLayout, QWidget, QApplication
-from qfluentwidgets import qconfig, FluentIconBase, NavigationItemPosition, isDarkTheme, FluentTitleBar, qrouter
+from qfluentwidgets import qconfig, isDarkTheme, FluentTitleBar, qrouter
 from qfluentwidgets.common.animation import BackgroundAnimationWidget
 from qfluentwidgets.components.widgets.frameless_window import FramelessWindow
 

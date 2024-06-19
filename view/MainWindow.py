@@ -8,8 +8,6 @@ from PyQt6.QtWidgets import QApplication
 from qfluentwidgets import SplashScreen
 
 from util.config import IMG_PATH
-from qfluentwidgets import FluentIcon as FIF
-
 from view.UserInterface import UserInterface
 from view.WindowBase import WindowBase
 

@@ -5,11 +5,12 @@ from venv import logger
 from PyQt6.QtCore import pyqtSlot, QTimer, Qt, QPoint
 from PyQt6.QtGui import QAction, QIcon, QColor
 from PyQt6.QtWidgets import QMainWindow, QTabWidget, QDockWidget, QPushButton, \
-    QMenu, QStackedWidget
+    QMenu, QStackedWidget, QMessageBox, QListWidget, QLabel, QVBoxLayout
 from qfluentwidgets import TextEdit
 
 from ui.style_sheet import CodeTabStyleSheet, CodeWindowStyleSheet, ButtonStyleSheet
 from util.config import IMG_PATH
+from view.Dialog import CreateVenvDialog
 from view.DockTitleBar import DockTitleBar
 from view.Editor import Editor
 
@@ -19,8 +20,9 @@ class CodeWindow(QMainWindow):
     代码窗口实现类
     """
 
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
+        self.parent = parent
         self.dock_show = False
         self.syntax_error = None
         self.init_ui()
@@ -39,6 +41,7 @@ class CodeWindow(QMainWindow):
         self.tabs.currentChanged.connect(self.__resetChangeTimer)
 
         self.setCentralWidget(self.tabs)
+        self.layout = QVBoxLayout(self)
 
         self.stacked_widget = QStackedWidget()
 
@@ -61,6 +64,7 @@ class CodeWindow(QMainWindow):
             border: 1px solid #f0f0f0;
             border-radius: 7px;
         """)
+        self.interpreter_list = QListWidget()
 
         self.dock_title = DockTitleBar(self.infoDock)
         self.dock_title.setMinBtn(self.dock_hide)
@@ -75,15 +79,86 @@ class CodeWindow(QMainWindow):
         # 创建状态栏按钮
         self.toggleButton = self.create_status_button('syntax_info.png', self.switch_widget, 0)
         self.show_log_button = self.create_status_button('code_run.png', self.switch_widget, 1)
+        self.dock_btn = QPushButton("解释器管理", self)
+        self.dock_btn.setCheckable(True)
+        self.dock_btn.setChecked(True)
+        self.dock_btn.setStyleSheet(ButtonStyleSheet)
+        self.dock_btn.clicked.connect(self.show_dock_menu)
 
         self.__statusBar = self.statusBar()
         self.__statusBar.addPermanentWidget(self.toggleButton)
         self.__statusBar.addPermanentWidget(self.show_log_button)
+        self.__statusBar.addPermanentWidget(self.dock_btn)
         self.__statusBar.setFixedHeight(24)
 
         self.__changeTimer = QTimer()
         self.__changeTimer.timeout.connect(self.check_syntax)
         self.__changeTimer.start(5000)
+
+    def show_dock_menu(self):
+        menu = QMenu()
+        history_action = menu.addAction("解释器列表")
+        history_action.triggered.connect(self.show_history)
+        create_action = menu.addAction("创建解释器")
+        create_action.triggered.connect(self.show_create_venv_dialog)
+        delete_action = menu.addAction("删除解释器")
+        delete_action.triggered.connect(self.delete_virtual_environment)
+        menu.exec(self.dock_btn.mapToGlobal(self.dock_btn.rect().bottomLeft()))
+
+    def show_history(self):
+        menu = QMenu()
+        for index in range(self.interpreter_list.count()):
+            interpreter = self.interpreter_list.item(index).text()
+            action = menu.addAction(interpreter)
+            action.triggered.connect(lambda checked, interp=interpreter: self.set_default_interpreter(interp))
+        menu.exec(self.dock_btn.mapToGlobal(self.dock_btn.rect().bottomLeft()))
+
+    def show_create_venv_dialog(self):
+        main_window_rect = self.parent.parent.geometry()
+        dialog = CreateVenvDialog(self)
+        dialog_rect = dialog.geometry()
+        center_x = main_window_rect.x() + (main_window_rect.width() - dialog_rect.width()) // 3
+        center_y = main_window_rect.y() + (main_window_rect.height() - dialog_rect.height()) // 3
+
+        dialog.move(center_x, center_y)
+
+        dialog.exec()
+
+    def delete_virtual_environment(self):
+        selected_item = self.interpreter_list.currentItem()
+        if selected_item:
+            interpreter_path = selected_item.text()
+            confirm = QMessageBox.question(self, "Confirm Delete",
+                                           f"Are you sure you want to delete {interpreter_path}?",
+                                           QMessageBox.Yes | QMessageBox.No)
+            if confirm == QMessageBox.Yes:
+                self.interpreter_list.takeItem(self.interpreter_list.row(selected_item))
+                if interpreter_path == self.dock_btn.text():
+                    self.dock_btn.setChecked('解释器管理')
+
+    def add_interpreter(self, interpreter_path):
+        if interpreter_path:
+            self.add_interpreter_to_history(interpreter_path)
+
+    def add_interpreter_to_history(self, interpreter_path):
+        if not any(
+                self.interpreter_list.item(i).text() == interpreter_path for i in range(self.interpreter_list.count())):
+            self.interpreter_list.addItem(interpreter_path)
+
+    def set_default_interpreter(self, interpreter_path=None):
+        if interpreter_path is None:
+            selected_item = self.interpreter_list.currentItem()
+            if selected_item:
+                interpreter_path = selected_item.text()
+        if interpreter_path:
+            self.dock_btn.setText(interpreter_path)
+
+    def remove_interpreter(self):
+        selected_item = self.interpreter_list.currentItem()
+        if selected_item:
+            self.interpreter_list.takeItem(self.interpreter_list.row(selected_item))
+            if self.dock_btn.text() == selected_item.text():
+                self.dock_btn.setText('解释器管理')
 
     def create_status_button(self, icon_path, callback, index):
         button = QPushButton("", self)

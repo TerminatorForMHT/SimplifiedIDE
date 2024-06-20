@@ -35,7 +35,7 @@ class MainWindow(WindowBase):
         # 4. 隐藏启动页面
         self.splashScreen.finish()
 
-        self.user_interface = UserInterface()
+        self.user_interface = UserInterface(self)
         self.user_interface.setObjectName('UserInterface')
         self.addSubInterface(self.user_interface)
 

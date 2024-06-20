@@ -13,8 +13,9 @@ from view.CodeWindow import CodeWindow
 
 
 class UserInterface(QMainWindow):
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
+        self.parent = parent
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
         self.history_file = "project_history.json"
         self.project_history = self.load_project_history()
@@ -70,7 +71,7 @@ class UserInterface(QMainWindow):
         border-radius: 7px;
         """)
         right_layout = QVBoxLayout(self.right_widget)
-        self.right_code = CodeWindow()
+        self.right_code = CodeWindow(self)
         right_layout.addWidget(self.right_code)
 
     def setup_menubar_no_mac(self):

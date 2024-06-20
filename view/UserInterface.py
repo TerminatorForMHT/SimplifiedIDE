@@ -7,9 +7,8 @@ from PyQt6.QtGui import QAction, QFileSystemModel
 from PyQt6.QtWidgets import QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QMenu, QMessageBox, \
     QInputDialog, QFileDialog
 from qfluentwidgets import TreeView, FluentIcon, DropDownPushButton, RoundMenu, Action
-from qfluentwidgets.components.material import AcrylicMenu
 
-from util.config import MySettings
+from util.config import MySettings, NotMac
 from view.CodeWindow import CodeWindow
 
 
@@ -24,16 +23,16 @@ class UserInterface(QMainWindow):
 
         self.setup_menubar()
         self.setup_ui()
-        if sys.platform != 'darwin':
-            self.top_project_button.hide()
+        if NotMac:
+            self.top_widget.hide()
         self.display_project_history()
         self.resizeEvent(None)
         self.last_opened_file = None
         self.load_settings()
         if self.last_opened_file:
             self.open_project(self.last_opened_file)
-            if sys.platform != 'darwin':
-                self.top_project_button.show()
+            if NotMac:
+                self.top_widget.show()
         self.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
 
     def setup_ui(self):
@@ -103,14 +102,10 @@ class UserInterface(QMainWindow):
         self.menubar = self.menuBar()
         file_menu = QMenu("文件", self)
         self.menubar.addMenu(file_menu)
-        try:
-            project_name = MySettings.value("lastProject")
-            if project_name:
-                self.project_menu = QMenu(project_name, self)
-            else:
-                self.project_menu = QMenu("项目", self)
+        project_name = MySettings.value("lastProject")[-1]['name']
+        if project_name:
             self.project_menu = QMenu(project_name, self)
-        except Exception:
+        else:
             self.project_menu = QMenu("项目", self)
         self.menubar.addMenu(self.project_menu)
 
@@ -123,7 +118,7 @@ class UserInterface(QMainWindow):
         file_menu.addAction(open_folder_action)
 
     def setup_menubar(self):
-        if sys.platform != 'darwin':
+        if NotMac:
             self.setup_menubar_no_mac()
         else:
             self.setup_menubar_mac()
@@ -182,13 +177,22 @@ class UserInterface(QMainWindow):
     def display_project_history(self):
         self.project_menu.clear()
         for project in self.project_history:
-            self.project_menu.addAction(Action(FluentIcon.PROJECTOR, project['name'],
-                                               triggered=lambda checked, path=project['path']: self.open_project(path)))
+            if NotMac:
+                self.project_menu.addAction(Action(
+                    FluentIcon.PROJECTOR, project['name'],
+                    triggered=lambda checked, path=project['path']: self.open_project(path)))
+            else:
+                action = QAction(project['name'], self)
+                action.triggered.connect(lambda checked, path=project['path']: self.open_project(path))
+                self.project_menu.addAction(action)
 
     def open_project(self, path):
         if os.path.exists(path):
             self.tree_view.setRootIndex(self.file_system_model.index(path))
             self.last_opened_file = path
+            if NotMac is False:
+                self.project_name = os.path.basename(path)
+                self.project_menu.setTitle(self.project_name)
             self.save_settings()
         else:
             QMessageBox.warning(self, "Warning", f"The project path {path} does not exist.")

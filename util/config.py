@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 from PyQt6.QtCore import QSettings
@@ -10,3 +11,5 @@ IMG_PATH = ROOT_PATH / 'src' / 'static' / 'img'
 PYLINTRC_PATH = ROOT_PATH / 'src' / 'pylint' / 'pylintrc'
 
 MySettings = QSettings("LastProject", "PythonPad++")
+
+NotMac = sys.platform != 'darwin'

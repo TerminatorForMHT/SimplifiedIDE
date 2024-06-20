@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import QMainWindow, QSplitter, QWidget, QVBoxLayout, QHBoxL
 from qfluentwidgets import TreeView, FluentIcon, DropDownPushButton, RoundMenu, Action
 
 from util.config import MySettings, NotMac
+from view.CodeWidget import CodeWidget
 from view.CodeWindow import CodeWindow
 
 
@@ -71,7 +72,7 @@ class UserInterface(QMainWindow):
         border-radius: 7px;
         """)
         right_layout = QVBoxLayout(self.right_widget)
-        self.right_code = CodeWindow(self)
+        self.right_code = CodeWidget(self)
         right_layout.addWidget(self.right_code)
 
     def setup_menubar_no_mac(self):

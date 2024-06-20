@@ -54,7 +54,7 @@ CodeWindowStyleSheet = """
 CodeEditorStyleSheet = """
         QsciScintilla {
            background-color: rgba(0, 0, 0, 0);
-           margin: 2px;
+           margin: 1px;
         }
         """
 CodeLabelStyleSheet = """

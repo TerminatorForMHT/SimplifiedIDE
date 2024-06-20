@@ -3,7 +3,7 @@ from pathlib import PurePath
 
 import autopep8
 from PyQt6.Qsci import QsciScintilla, QsciLexerPython
-from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent
+from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent, QStringConverter
 from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
 from PyQt6.QtWidgets import QApplication
 from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont
@@ -104,10 +104,10 @@ class Editor(QsciScintilla):
             self.init_ui(lexer)
             logging.error(e)
         self.file_name = file_path.split("/")[-1].rstrip(".py")
-        self.setReadOnly("pyi" in file_path)
         file = QFile(file_path)
         if file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
             stream = QTextStream(file)
+            stream.setEncoding(QStringConverter.Encoding.Utf8)
             self.setText(stream.readAll())
             file.close()
 
@@ -130,7 +130,7 @@ class Editor(QsciScintilla):
                 jedi_lib = JdeiLib(source=self.text(), filename=self.current_file_path)
                 jump_info = {
                     "assign_addr": jedi_lib.getAssignment(line, index),
-                    "reference_addr": jedi_lib.getReferences(line, index)
+                    "reference_addr": jedi_lib.getReferences(line, index),
                 }
                 self.ctrl_left_click_signal.emit(jump_info)
         super().mousePressEvent(event)

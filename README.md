@@ -50,4 +50,4 @@ _暂时只有我自己，哈哈哈哈_
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## 致谢
-不敢谢上帝
+不感谢上帝

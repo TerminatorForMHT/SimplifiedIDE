@@ -3,7 +3,7 @@ import sys
 from pathlib import PurePath
 
 from PyQt6.QtCore import QPoint
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QCursor
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QStackedWidget, QTextEdit, QMainWindow, QApplication
 from qfluentwidgets import TabBar, ListWidget, RoundMenu, Action
 
@@ -63,7 +63,7 @@ class CodeWidget(QWidget):
         path, line, column = jump_info.get('ModulePath'), jump_info.get('Line'), jump_info.get('Column')
         self.jump_to_assign_tab(path, line, column)
 
-    def show_reference_menu(self, reference_addr, current_tab):
+    def show_reference_menu(self, reference_addr):
         menu = RoundMenu()
         icon = str(IMG_PATH.joinpath(PurePath('python.png')))
         for item in reference_addr:
@@ -71,24 +71,14 @@ class CodeWidget(QWidget):
             line, code = item.get('Line'), item.get('Code')
             item_info = f'{file}    {line}   {code}'
             menu.addAction(Action(QIcon(icon), item_info, triggered=lambda: self.reference_jump(item)))
-        line, index = current_tab.get_cursor_pos()
-        global_pos = self.mapToGlobal(
-            QPoint(current_tab.SendScintilla(current_tab.SCI_POINTXFROMPOSITION, line, index),
-                   current_tab.SendScintilla(current_tab.SCI_POINTYFROMPOSITION, line)))
-        menu.exec(global_pos)
-        menu.deleteLater()
+        pos = QCursor.pos()
+        menu.exec(pos)
 
     def handle_ctrl_left_click(self, info: dict):
         assign_addr = info.get("assign_addr")
         reference_addr = info.get("reference_addr")
         current_tab = self.stacked_widget.currentWidget()
-        print(assign_addr)
-        print('debug_mark_debug'.center(20, '*'))
-        print(reference_addr)
-        if reference_addr:
-            # TODO 这里菜单不显示还会卡死，待修复，今天睡觉了！
-            self.show_reference_menu(reference_addr, current_tab)
-        elif assign_addr:
+        if assign_addr:
             path = assign_addr.get('ModulePath')
             line = assign_addr.get('Line')
             index = assign_addr.get('Column')
@@ -96,4 +86,6 @@ class CodeWidget(QWidget):
                 self.jump_to_assign_tab(path, line, index)
             else:
                 self.jump_to_assign_line(line, index)
-        current_tab.setSelection(0, 0, 0, 0)
+        elif reference_addr:
+            self.show_reference_menu(reference_addr)
+        # current_tab.setSelection(0, 0, 0, 0)

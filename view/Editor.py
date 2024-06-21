@@ -133,7 +133,8 @@ class Editor(QsciScintilla):
                     "reference_addr": jedi_lib.getReferences(line, index),
                 }
                 self.ctrl_left_click_signal.emit(jump_info)
-        super().mousePressEvent(event)
+        else:
+            super().mousePressEvent(event)
 
     def move_cursor_visible(self, line, index=0):
         if line:

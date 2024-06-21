@@ -1,93 +1,150 @@
 [MASTER]
-# Disable all checks by default
-disable=all
+# 默认禁用所有检查
+disable=
+    E0015,
+    R0022,
+    W0012,
+    C0103,
+    C0103,
+    W0201,
+    E401,
+    C0114,  # 缺少模块 Docstring
+    C0115,  # 缺少类 Docstring
+    C0116,  # 缺少方法 Docstring
+    R0205,  # 类方法没有使用 cls 参数
+    R0903,  # 过多的实例属性
+    R0801   # 与太多实例属性相关的警告
+
+# Pickle 收集数据以供以后比较。
+persistent=no
 
 [MESSAGES CONTROL]
-# Enable PEP 8 related checks
+
+# 输出的最大行宽
+max-line-length=120
+
+# 控制某些特定的检查
 enable=
-    C0103,  # Invalid constant name
-    C0111,  # Missing module docstring
-    C0112,  # Empty docstring
-    C0301,  # Line too long
-    C0302,  # Too many lines in module
-    C0321,  # More than one statement on a single line
-    C0326,  # Bad whitespace
-    C0330,  # Wrong hanging indentation before block
-    C0331,  # Trailing whitespace
-    C0333,  # Trailing comma
-    C0411,  # Standard import should be placed before
-    C0412,  # Imports from package should be grouped
-    C0413,  # Import "X" should be placed at the top of the module
-    C0414,  # Import alias does not start with lower case letter
-    C0415,  # Import alias does not start with lower case letter
-    C0416,  # Import alias should be used
-    C0417,  # Import alias should not start with an underscore
-    C1801,  # Do not use len(SEQUENCE) without a comparison to determine if a sequence is empty
-    E1101,  # No member
-    W0311,  # Bad indentation
-    W0312,  # Mixed indentation
-    W0401,  # Wildcard import
-    W0406,  # Module import itself
-    W0410,  # Import from wildcard import
-    W0511,  # TODO found
-    W0611,  # Unused import
-    W0612,  # Unused variable
-    W0613,  # Unused argument
-    W0621,  # Redefining name
-    W0622,  # Redefining built-in
-    W0702,  # No exception type(s) specified
-    W0703,  # Catching too general exception
-    W0706,  # Not using the "with" statement properly
-    W0718,  # Exception triggered by a conditional expression
-    W1505,  # Using deprecated method
+    logging-not-lazy,  # 检查是否延迟日志记录
+    duplicate-code     # 检查重复的代码
+
+# 忽略的特定错误或警告
+disable=
+    fixme,
+    invalid-name,
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring
 
 [FORMAT]
-# Maximum number of characters on a single line.
+# 单行的最大字符数。
 max-line-length=79
+# 模块中的最大行数
+max-module-lines=1000
+# 设置缩进方法：“空格”或“制表符”。
+indent-string='    '
+# 每个缩进级别的空格数。
+indent-after-paren=4
 
 [DESIGN]
-# Maximum number of arguments for function / method.
+# 函数/方法的最大参数数量。
 max-args=5
 
-# Maximum number of attributes for a class (see R0902).
+# 类的最大属性数（请参阅 R0902）。
 max-attributes=10
 
-# Maximum number of boolean expressions in a if statement.
+# if 语句中布尔表达式的最大数量。
 max-bool-expr=5
 
-# Maximum number of branch for function / method body.
+# 函数/方法体的最大分支数。
 max-branches=12
 
-# Maximum number of return / yield for function / method body.
+# 函数/方法体的最大 return/yield 数。
 max-returns=6
 
-# Maximum number of locals for function / method body.
+# 函数/方法体的最大本地数。
 max-locals=15
 
-# Maximum number of parents for a class (see R0901).
+# 一个类继承的父类最大数值（参见 R0901）。
 max-parents=7
 
-# Maximum number of public methods for a class (see R0904).
+# 类的公共方法的最大数量（请参阅 R0904）。
 max-public-methods=20
 
-# Minimum number of public methods for a class (see R0903).
+# 类的公共方法的最小数量（参见 R0903）。
 min-public-methods=2
 
+# 函数/方法体中的最大语句数
+max-statements=50
+
 [REPORTS]
-# Set the output format. Available formats are text, parseable, colorized, json and msvs
-output-format=text
+# Set the output format. Available formats are text, parseable, colorized, json and msvs (visual studio).
+output-format=colorized
+
+# Tells whether to display a full report or only the messages
+reports=no
 
 [TYPECHECK]
-# Telling pylint which modules to ignore during the type checking phase.
+# 告诉 pylint 在类型检查阶段忽略哪些模块。
 ignored-modules=
 
-# Telling pylint which modules to ignore when they're found to be missing.
-ignored-classes=
+# 当发现模块丢失时，告诉 pylint 忽略哪些模块。
+ignored-classes=asic.*
+
+# 指示在调用动态属性（未在类本身中设置但动态添加的方法或属性）时是否警告缺少成员。
+generated-members=
+
 
 [LOGGING]
-# Format style used to check logging format string. `new` is for str.format(), `old` is for % operator.
-logging-format-style=old
+# 日志配置
+logging-modules=logging
+
+[BASIC]
+# 变量名称的长度为 1 到 31 个字符，包含小写和大写字符、数字和下划线。第一个字符必须是字母。
+variable-rgx=[a-z_][a-z0-9_]{0,30}$
+# 参数名称应与此正则表达式匹配。
+argument-rgx=[a-z_][a-z0-9_]{0,30}$
+# 函数名称应与此正则表达式匹配。
+function-rgx=[a-z_][a-z0-9_]{2,80}$
+# 方法名称应与此正则表达式匹配。
+method-rgx=[a-z_][a-z0-9_]{2,80}$
+# 常量名称应与此正则表达式匹配。
+const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__))$
+# 与此表达式匹配的模块名称将被跳过
+module-rgx=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
+# 类名应与此正则表达式匹配。
+class-rgx=[A-Z_][a-zA-Z0-9]+$
+# 是否在所有方法中检查文档字符串是否存在
+docstring-min-length=10
+# 检查缩进样式，表示使用制表符或空格
+indent-string-style=space
+
+[SIMILARITIES]
+# 相似性的最小行数。
+min-similarity-lines=4
+
+[IMPORTS]
+# 允许通配符导入
+allow-wildcard-with-all=yes
+# 不应使用的已弃用模块
+deprecated-modules=optparse,tkinter.tix
+
+[VARIABLES]
+# 与虚拟变量名称匹配的正则表达式（即预计不使用）。
+dummy-variables-rgx=_|dummy
+# 与函数参数中的虚拟变量名称（即预期不使用）匹配的正则表达式。
+dummy-variables-arg-rgx=_|dummy
+# 应该在内建函数中定义的附加名称列表。请记住，您应该尽可能避免定义新的内置函数。
+additional-builtins=
+
+[CLASSES]
+# 用于声明（即分配）实例属性的方法名称列表。
+defining-attr-methods=__init__,__new__,setUp,setup
+# 类方法中第一个参数的有效名称列表。
+valid-classmethod-first-arg=cls
+# 元类方法中第一个参数的有效名称列表。
+valid-metaclass-classmethod-first-arg=mcs
 
 [MISCELLANEOUS]
-# List of note tags to take in consideration, separated by a comma.
+# 要考虑的注释标签列表，以逗号分隔。
 notes=FIXME,XXX,TODO

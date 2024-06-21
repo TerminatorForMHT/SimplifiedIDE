@@ -72,7 +72,7 @@ class CodeWidget(QWidget):
             file = item['ModulePath'].split(os.sep)[-1]
             line, code = item['Line'], item['Code']
             item_info = f'{file}    {line}   {code}'
-            menu.addAction(Action(QIcon(icon), item_info, triggered=lambda item=item: self.reference_jump(item)))
+            menu.addAction(Action(QIcon(icon), item_info, triggered=lambda: self.reference_jump(item)))
         menu.exec(QCursor.pos())
 
     def handle_ctrl_left_click(self, info: dict):

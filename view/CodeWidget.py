@@ -70,7 +70,7 @@ class CodeWidget(QWidget):
         icon = str(IMG_PATH.joinpath(PurePath('python.png')))
         for item in reference_addr:
             file = item['ModulePath'].split(os.sep)[-1]
-            line, code = item['Line'], item['Code']
+            line, code = item.get('Line'), item.get('Code')
             item_info = f'{file}    {line}   {code}'
             menu.addAction(Action(QIcon(icon), item_info, triggered=lambda: self.reference_jump(item)))
         menu.exec(QCursor.pos())
@@ -78,7 +78,6 @@ class CodeWidget(QWidget):
     def handle_ctrl_left_click(self, info: dict):
         assign_addr = info.get("assign_addr")
         reference_addr = info.get("reference_addr")
-
         if assign_addr:
             path, line, index = assign_addr['ModulePath'], assign_addr['Line'], assign_addr['Column']
             current_tab = self.stacked_widget.currentWidget()
@@ -87,4 +86,7 @@ class CodeWidget(QWidget):
             else:
                 self.jump_to_assign_line(line, index)
         elif reference_addr:
-            self.show_reference_menu(reference_addr)
+            if len(reference_addr) == 1:
+                self.reference_jump(reference_addr[0])
+            elif len(reference_addr) > 1:
+                self.show_reference_menu(reference_addr)

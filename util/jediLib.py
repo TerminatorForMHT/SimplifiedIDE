@@ -1,3 +1,4 @@
+import sys
 from venv import logger
 
 import jedi
@@ -91,6 +92,9 @@ class JdeiLib:
         @type dict
         """
         gotoDefinition = {}
+        flag_path = self.filename
+        if sys.platform == "win32":
+            flag_path = flag_path.replace("/", "\\")
         try:
             assignments = self.script.goto(
                 line, index, follow_imports=True, follow_builtin_imports=True
@@ -102,9 +106,8 @@ class JdeiLib:
                         "Line": (0 if assignment.line is None else assignment.line),
                         "Column": assignment.column,
                     }
-
                     if (
-                            gotoDefinition["ModulePath"] == self.filename
+                            gotoDefinition["ModulePath"] == flag_path
                             and gotoDefinition["Line"] == line
                     ):
                         return
@@ -122,13 +125,16 @@ class JdeiLib:
         @type dict
         """
         gotoReferences = []
+        flag_path = self.filename
+        if sys.platform == "win32":
+            flag_path = flag_path.replace("/", "\\")
         try:
             references = self.script.get_references(line, index, include_builtins=False)
             for reference in references:
                 if bool(reference.module_path):
                     if (
                             reference.line == line
-                            and str(reference.module_path) == self.filename
+                            and str(reference.module_path) == flag_path
                     ):
                         continue
                     gotoReferences.append(

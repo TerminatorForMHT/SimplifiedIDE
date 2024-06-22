@@ -42,9 +42,3 @@ def find_python_paths():
                     python_paths.add(str(potential_path.resolve()))
 
     return sorted(python_paths)
-
-
-if __name__ == "__main__":
-    python_paths = find_python_paths()
-    for path in python_paths:
-        print(path)

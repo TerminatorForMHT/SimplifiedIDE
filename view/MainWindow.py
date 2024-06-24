@@ -4,13 +4,14 @@ from pathlib import PurePath
 
 from PyQt6.QtCore import Qt, QEventLoop, QTimer, QSize
 from PyQt6.QtGui import QColor, QPainter, QIcon
-from PyQt6.QtWidgets import (QHBoxLayout, QWidget, QVBoxLayout, QSplitter, QListWidget, QPushButton, QSizePolicy, QMenu, QMessageBox)
-from qfluentwidgets import qconfig, isDarkTheme, FluentTitleBar, SplashScreen, FluentIcon
+from PyQt6.QtWidgets import (QHBoxLayout, QWidget, QVBoxLayout, QSplitter, QListWidget, QPushButton, QSizePolicy, QMenu,
+                             QMessageBox)
+from qfluentwidgets import qconfig, isDarkTheme, FluentTitleBar, SplashScreen
 from qfluentwidgets.common.animation import BackgroundAnimationWidget
 from qfluentwidgets.components.widgets.frameless_window import FramelessWindow
 
+from conf.config import IMG_PATH
 from ui.style_sheet import ButtonStyleSheet
-from util.config import IMG_PATH
 from view.Dialog import CreateVenvDialog
 from view.DockWidget import DockWidget
 from view.UserInterface import UserInterface

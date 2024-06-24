@@ -6,7 +6,7 @@ from PyQt6.QtGui import QIcon, QCursor
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QStackedWidget
 from qfluentwidgets import TabBar, RoundMenu, Action
 
-from util.config import IMG_PATH
+from conf.config import IMG_PATH
 from view.Editor import Editor
 
 

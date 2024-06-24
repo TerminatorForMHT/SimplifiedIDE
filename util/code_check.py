@@ -5,7 +5,7 @@ from io import StringIO
 from pylint.lint import Run
 from pylint.reporters.json_reporter import JSONReporter
 
-from util.config import PYLINTRC_PATH
+from conf.config import PYLINTRC_PATH
 
 
 def run_pylint_on_code(path):

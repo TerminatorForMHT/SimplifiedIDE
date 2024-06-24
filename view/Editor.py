@@ -8,9 +8,9 @@ from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
 from PyQt6.QtWidgets import QApplication
 from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont
 
+from conf.config import IMG_PATH
 from ui.style_sheet import CodeEditorStyleSheet
 from util.code_check import run_pylint_on_code
-from util.config import IMG_PATH
 from util.jediLib import JdeiLib
 from util.lexer import LEXER_MAP
 

@@ -1,7 +1,7 @@
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QVBoxLayout, QStackedWidget, QWidget, QSizePolicy
 from qfluentwidgets import TextEdit
+
 from view.DockTitleBar import DockTitleBar
 
 

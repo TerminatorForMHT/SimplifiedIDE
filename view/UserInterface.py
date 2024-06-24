@@ -1,18 +1,21 @@
 import json
 import os
+
 from PyQt6.QtCore import Qt, QDir, pyqtSignal
 from PyQt6.QtGui import QFileSystemModel
 from PyQt6.QtWidgets import QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QMessageBox, QInputDialog, QFileDialog
 from qfluentwidgets import TreeView, FluentIcon, DropDownPushButton, RoundMenu, Action
-from util.config import MySettings
+
+from conf.config import MySettings, ROOT_PATH
 from view.CodeWidget import CodeWidget
+
 
 class UserInterface(QWidget):
     open_file_signal = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__()
-        self.history_file = "project_history.json"
+        self.history_file = ROOT_PATH / "project_history.json"
         self.project_history = self.load_project_history()
         self.last_opened_file = None
         self.init_ui()

@@ -12,7 +12,8 @@ from qfluentwidgets.components.widgets.frameless_window import FramelessWindow
 
 from conf.config import IMG_PATH
 from ui.style_sheet import ButtonStyleSheet
-from view.Dialog import CreateVenvDialog
+
+from view.CreateVenvMessageBox import CreateVenvMessageBox
 from view.DockWidget import DockWidget
 from view.UserInterface import UserInterface
 
@@ -174,8 +175,8 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
         menu.exec(self.dock_btn.mapToGlobal(self.dock_btn.rect().bottomLeft()))
 
     def show_create_venv_dialog(self):
-        dialog = CreateVenvDialog(self)
-        dialog.move(self.geometry().center() - dialog.rect().center())
+        dialog = CreateVenvMessageBox(self)
+        # dialog.move(self.geometry().center())
         dialog.exec()
 
     def delete_virtual_environment(self):

@@ -1,9 +1,8 @@
 # PythonPad ++
 
-
 ![Version](https://img.shields.io/badge/version-0.0.1-brightgreen.svg)
 
-基于PyQt6开发的Python代码编辑器
+**基于PyQt6开发的Python,Fluent Design风格的现代化代码编辑器**
 
 ## 目录
 
@@ -17,7 +16,13 @@
 
 ## 介绍
 
-基于Python与PyQt学习练手的目的，开发一个自己可用的工具，目前市面上的IDE都已经很强大了，不过PyCharm是要花钱购买，VSCode不够美观且对新手不友好，所以开发一个IDE尝试下
+目前市面上的IDE都是自己的风格，但是看起来都不是很现代化  
+所以我想写一款微软的Fluent Design风格的Z世代IDE  
+目前基础编辑，代码提示优化功能已经完善  
+解释器管理，包管理以及代码执行调试还没写完  
+目前只支持Python的编辑提示，其他语法支持高亮  
+后续可能采用VsCode一样的插件方案来适配多语言  
+欢迎有兴趣的朋友加入一起构建
 
 ## 特性
 
@@ -44,10 +49,13 @@ python3 main.py
 ```
 
 ## 贡献
+
 _暂时只有我自己，哈哈哈哈_
 
 ## 许可证
+
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## 致谢
+
 不感谢上帝

@@ -40,7 +40,6 @@ class Editor(QsciScintilla):
 
     def init_ui(self, lexer):
         self.setLexer(lexer)
-        # self.setStyleSheet(CodeEditorStyleSheet)
 
         self.setAutoIndent(True)
         self.setIndentationWidth(4)

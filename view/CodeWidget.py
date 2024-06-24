@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import PurePath
 
 from PyQt6.QtCore import pyqtSignal
@@ -33,13 +34,14 @@ class CodeWidget(QWidget):
         self.add_new_tab(file_path)
 
     def add_new_tab(self, file_path):
+        sep = '\\' if sys.platform == "win32" else '/'
         editor = Editor(self)
         editor.load_file(file_path)
         editor.ctrl_left_click_signal.connect(self.handle_ctrl_left_click)
         self.stacked_widget.addWidget(editor)
 
         index = self.stacked_widget.count() - 1
-        self.tab_bar.addTab(index, file_path.split('/')[-1])
+        self.tab_bar.addTab(index, file_path.split(sep)[-1])
         self.tab_bar.setCurrentTab(index)
         self.stacked_widget.setCurrentWidget(editor)
         return editor

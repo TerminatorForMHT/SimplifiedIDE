@@ -15,7 +15,7 @@ class UserInterface(QWidget):
 
     def __init__(self, parent=None):
         super().__init__()
-        self.history_file = ROOT_PATH / "project_history.json"
+        self.history_file = ROOT_PATH / 'conf' / "project_history.json"
         self.project_history = self.load_project_history()
         self.last_opened_file = None
         self.init_ui()

@@ -8,8 +8,7 @@ from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
 from PyQt6.QtWidgets import QApplication
 from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont
 
-from conf.config import IMG_PATH
-from ui.style_sheet import CodeEditorStyleSheet
+from conf.config import IMG_PATH, SEP
 from util.code_check import run_pylint_on_code
 from util.jediLib import JdeiLib
 from util.lexer import LEXER_MAP
@@ -41,7 +40,7 @@ class Editor(QsciScintilla):
 
     def init_ui(self, lexer):
         self.setLexer(lexer)
-        self.setStyleSheet(CodeEditorStyleSheet)
+        # self.setStyleSheet(CodeEditorStyleSheet)
 
         self.setAutoIndent(True)
         self.setIndentationWidth(4)
@@ -103,7 +102,7 @@ class Editor(QsciScintilla):
         except Exception as e:
             self.init_ui(lexer)
             logging.error(e)
-        self.file_name = file_path.split("/")[-1].rstrip(".py")
+        self.file_name = file_path.split(SEP)[-1].rstrip(".py")
         file = QFile(file_path)
         if file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
             stream = QTextStream(file)

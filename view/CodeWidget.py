@@ -1,5 +1,4 @@
 import os
-import sys
 from pathlib import PurePath
 
 from PyQt6.QtCore import pyqtSignal
@@ -7,7 +6,7 @@ from PyQt6.QtGui import QIcon, QCursor
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QStackedWidget
 from qfluentwidgets import TabBar, RoundMenu, Action
 
-from conf.config import IMG_PATH
+from conf.config import IMG_PATH, SEP
 from view.Editor import Editor
 
 
@@ -20,6 +19,7 @@ class CodeWidget(QWidget):
 
     def init_ui(self):
         self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.tab_bar = TabBar()
         self.tab_bar.setAddButtonVisible(False)
         self.stacked_widget = QStackedWidget()
@@ -34,14 +34,13 @@ class CodeWidget(QWidget):
         self.add_new_tab(file_path)
 
     def add_new_tab(self, file_path):
-        sep = '\\' if sys.platform == "win32" else '/'
         editor = Editor(self)
         editor.load_file(file_path)
         editor.ctrl_left_click_signal.connect(self.handle_ctrl_left_click)
         self.stacked_widget.addWidget(editor)
 
         index = self.stacked_widget.count() - 1
-        self.tab_bar.addTab(index, file_path.split(sep)[-1])
+        self.tab_bar.addTab(index, file_path.split(SEP)[-1])
         self.tab_bar.setCurrentTab(index)
         self.stacked_widget.setCurrentWidget(editor)
         return editor
@@ -71,7 +70,7 @@ class CodeWidget(QWidget):
         menu = RoundMenu()
         icon = str(IMG_PATH.joinpath(PurePath('python.png')))
         for item in reference_addr:
-            file = item['ModulePath'].split(os.sep)[-1]
+            file = item['ModulePath'].split(SEP)[-1]
             line, code = item.get('Line'), item.get('Code')
             item_info = f'{file}    {line}   {code}'
             menu.addAction(Action(QIcon(icon), item_info, triggered=lambda: self.reference_jump(item)))

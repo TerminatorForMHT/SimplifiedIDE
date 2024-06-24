@@ -18,6 +18,7 @@ from view.UserInterface import UserInterface
 
 ICON = str(IMG_PATH.joinpath(PurePath('snake.svg')))
 
+
 class MainWindow(BackgroundAnimationWidget, FramelessWindow):
     def __init__(self, parent=None):
         self._isMicaEnabled = False
@@ -51,11 +52,11 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.hBoxLayout.addWidget(self.mainWidget)
-        self.widgetLayout.setContentsMargins(0, 48, 0, 0)
+        self.widgetLayout.setContentsMargins(0, 30, 0, 0)
         self.widgetLayout.addWidget(self.mainWidget)
         self.setLayout(self.hBoxLayout)
         self.splitter = QSplitter(Qt.Orientation.Vertical)
-        self.user_interface = UserInterface(self)
+        self.user_interface = UserInterface()
         self.user_interface.open_file_signal.connect(self.resetChangeTimer)
         self.dock_widget = DockWidget(self)
         self.dock_widget.hide_signal.connect(self.hide_dock)

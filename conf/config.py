@@ -13,3 +13,5 @@ PYLINTRC_PATH = ROOT_PATH / 'src' / 'pylint' / 'pylintrc'
 MySettings = QSettings("LastProject", "PythonPad++")
 
 NotMac = sys.platform != 'darwin'
+
+SEP = '\\' if sys.platform == "win32" else '/'

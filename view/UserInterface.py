@@ -13,7 +13,7 @@ from view.CodeWidget import CodeWidget
 class UserInterface(QWidget):
     open_file_signal = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self):
         super().__init__()
         self.history_file = ROOT_PATH / 'conf' / "project_history.json"
         self.project_history = self.load_project_history()
@@ -25,7 +25,7 @@ class UserInterface(QWidget):
 
     def init_ui(self):
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
-        self.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
+        # self.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
 
         self.main_layout = QVBoxLayout(self)
         self.setLayout(self.main_layout)
@@ -43,6 +43,7 @@ class UserInterface(QWidget):
 
         self.left_widget = QWidget()
         left_layout = QVBoxLayout(self.left_widget)
+        left_layout.setContentsMargins(0, 0, 0, 0)
         self.tree_view = TreeView()
         self.tree_view.setModel(self.file_system_model)
         self.tree_view.setHeaderHidden(True)
@@ -56,7 +57,9 @@ class UserInterface(QWidget):
         self.right_widget = QWidget()
         self.right_widget.setStyleSheet("background-color: rgb(255, 255, 255); border-radius: 7px;")
         right_layout = QVBoxLayout(self.right_widget)
+        right_layout.setContentsMargins(0, 0, 0, 0)
         self.right_code = CodeWidget(self)
+        self.right_code.setStyleSheet("margin: 0px;")
         right_layout.addWidget(self.right_code)
         self.splitter.addWidget(self.right_widget)
 

@@ -147,6 +147,7 @@ class JdeiLib:
                     )
         except Exception as err:
             logger.error(str(err))
+
         return gotoReferences
 
     def get_syntax_errors(self):

@@ -14,15 +14,17 @@ class DockWidget(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setLayout(QVBoxLayout(self))
+        layout = QVBoxLayout(self)
+        self.setLayout(layout)
+        layout.setContentsMargins(10, 0, 10, 0)
         self.dock_title = DockTitleBar(self)
         self.dock_title.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.dock_title.setMinBtn(self.hide)
 
-        self.layout().addWidget(self.dock_title)
+        layout.addWidget(self.dock_title)
 
         self.stacked_widget = QStackedWidget()
-        self.layout().addWidget(self.stacked_widget)
+        layout.addWidget(self.stacked_widget)
 
         self.info_widget = TextEdit(self)
         self.log_widget = TextEdit(self)

@@ -25,7 +25,6 @@ class UserInterface(QWidget):
 
     def init_ui(self):
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
-        # self.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
 
         self.main_layout = QVBoxLayout(self)
         self.setLayout(self.main_layout)

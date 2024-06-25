@@ -29,6 +29,7 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
         self.setup_window()
         self.setup_layout()
         self.setup_ui_elements()
+        self.setStyleSheet('background-color: rgba(255, 255, 255, 0)')
         self.createSubInterface()
         self.splashScreen.finish()
         self.show()

@@ -2,7 +2,6 @@ import os
 import subprocess
 
 from PyQt6.QtWidgets import QMessageBox
-from objc._objc import python_selector
 from qfluentwidgets import MessageBoxBase, SubtitleLabel, LineEdit, ComboBox
 
 from util.common_method import find_python_paths

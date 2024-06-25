@@ -32,6 +32,7 @@ class UserInterface(QWidget):
         self.setup_menubar()
         self.setup_splitter()
         self.display_project_history()
+        self.setStyleSheet('background-color: rgba(255, 255, 255, 0)')
 
     def setup_splitter(self):
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -62,7 +63,7 @@ class UserInterface(QWidget):
         right_layout.addWidget(self.right_code)
         self.splitter.addWidget(self.right_widget)
 
-        self.splitter.setSizes([int(self.width() * 0.2), int(self.width() * 0.8)])
+        self.splitter.setSizes([int(self.width() * 0.1), int(self.width() * 0.9)])
 
     def setup_menubar(self):
         self.top_widget = QWidget()

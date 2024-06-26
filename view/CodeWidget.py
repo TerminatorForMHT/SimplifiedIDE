@@ -23,6 +23,7 @@ class CodeWidget(QWidget):
         self.tab_bar = TabBar()
         self.tab_bar.setAddButtonVisible(False)
         self.stacked_widget = QStackedWidget()
+        self.stacked_widget.setStyleSheet('margin: 2px;')
 
         self.layout.addWidget(self.tab_bar)
         self.layout.addWidget(self.stacked_widget)

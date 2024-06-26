@@ -22,6 +22,7 @@ class Editor(QsciScintilla):
 
     def __init__(self, parent):
         super(Editor, self).__init__(parent)
+        self.setStyleSheet('margin: 2px;')
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.scrollDelegate = SmoothScrollDelegate(self)

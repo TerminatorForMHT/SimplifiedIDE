@@ -26,26 +26,30 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
         self._lightBackgroundColor = QColor(243, 243, 243)
         self._darkBackgroundColor = QColor(32, 32, 32)
         super().__init__(parent)
+        self.setup_start_window()
         self.setup_window()
         self.setup_layout()
         self.setup_ui_elements()
         self.setStyleSheet('background-color: rgba(255, 255, 255, 0)')
+        self.show()
+
+
+    def setup_start_window(self):
+        self.resize(700, 600)
+        self.setTitleBar(FluentTitleBar(self))
+        self.splashScreen = SplashScreen(self.windowIcon(), self)
+        self.splashScreen.setIconSize(QSize(102, 102))
+        self.show()
         self.createSubInterface()
         self.splashScreen.finish()
-        self.show()
 
     def setup_window(self):
         self.syntax_error = None
-
-        self.setTitleBar(FluentTitleBar(self))
         self.resize(700, 600)
         self.setWindowTitle('PythonPad++')
         self.setWindowIcon(QIcon(ICON))
         self.setMicaEffectEnabled(True)
         qconfig.themeChangedFinished.connect(self._onThemeChangedFinished)
-        self.splashScreen = SplashScreen(self.windowIcon(), self)
-        self.splashScreen.setIconSize(QSize(102, 102))
-        self.splashScreen.show()
 
     def setup_layout(self):
         self.hBoxLayout = QHBoxLayout(self)

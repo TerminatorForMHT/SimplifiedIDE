@@ -36,12 +36,13 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
 
     def setup_start_window(self):
         self.resize(700, 600)
-        self.setTitleBar(FluentTitleBar(self))
         self.splashScreen = SplashScreen(self.windowIcon(), self)
         self.splashScreen.setIconSize(QSize(102, 102))
+        self.splashScreen.titleBar.hide()
         self.show()
         self.createSubInterface()
         self.splashScreen.finish()
+        self.titleBar.show()
 
     def setup_window(self):
         self.syntax_error = None

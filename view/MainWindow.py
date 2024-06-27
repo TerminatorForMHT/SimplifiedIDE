@@ -6,7 +6,7 @@ from PyQt6.QtCore import Qt, QEventLoop, QTimer, QSize
 from PyQt6.QtGui import QColor, QPainter, QIcon
 from PyQt6.QtWidgets import (QHBoxLayout, QWidget, QVBoxLayout, QSplitter, QListWidget, QPushButton, QSizePolicy, QMenu,
                              QMessageBox)
-from qfluentwidgets import qconfig, isDarkTheme, FluentTitleBar, SplashScreen
+from qfluentwidgets import qconfig, isDarkTheme, SplashScreen, FluentTitleBar
 from qfluentwidgets.common.animation import BackgroundAnimationWidget
 from qfluentwidgets.components.widgets.frameless_window import FramelessWindow
 
@@ -26,6 +26,7 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
         self._lightBackgroundColor = QColor(243, 243, 243)
         self._darkBackgroundColor = QColor(32, 32, 32)
         super().__init__(parent)
+        self.setup_titlebar()
         self.setup_start_window()
         self.setup_window()
         self.setup_layout()
@@ -33,22 +34,23 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
         self.setStyleSheet('background-color: rgba(255, 255, 255, 0)')
         self.show()
 
+    def setup_titlebar(self):
+        self.setTitleBar(FluentTitleBar(self))
+        self.setWindowTitle('PythonPad++')
+        self.setWindowIcon(QIcon(ICON))
 
     def setup_start_window(self):
+
         self.resize(700, 600)
         self.splashScreen = SplashScreen(self.windowIcon(), self)
-        self.splashScreen.setIconSize(QSize(102, 102))
         self.splashScreen.titleBar.hide()
+        self.splashScreen.setIconSize(QSize(102, 102))
         self.show()
         self.createSubInterface()
         self.splashScreen.finish()
-        self.titleBar.show()
 
     def setup_window(self):
         self.syntax_error = None
-        self.resize(700, 600)
-        self.setWindowTitle('PythonPad++')
-        self.setWindowIcon(QIcon(ICON))
         self.setMicaEffectEnabled(True)
         qconfig.themeChangedFinished.connect(self._onThemeChangedFinished)
 
@@ -182,7 +184,6 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
 
     def show_create_venv_dialog(self):
         dialog = CreateVenvMessageBox(self)
-        # dialog.move(self.geometry().center())
         dialog.exec()
 
     def delete_virtual_environment(self):

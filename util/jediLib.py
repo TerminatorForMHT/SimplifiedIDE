@@ -160,3 +160,66 @@ class JdeiLib:
                             error_info=syntax_error.get_message()
                             ))
         return ret
+
+    def __completionFullName(self, completion):
+        """
+        Private method to extract the full completion name.
+
+        @param completion reference to the completion object
+        @type jedi.api.classes.Completion
+        @return full completion name
+        @rtype str
+        """
+        fullName = completion.full_name
+        fullName = (
+            fullName.replace("__main__", completion.module_name)
+            if fullName
+            else completion.module_name
+        )
+
+        return fullName
+
+    def __completionType(self, completion):
+        """
+        Private method to assemble the completion type depending on the
+        visibility indicated by the completion name.
+
+        @param completion reference to the completion object
+        @type jedi.api.classes.Completion
+        @return modified completion type
+        @rtype str
+        """
+        if completion.name.startswith("__"):
+            compType = "__" + completion.type
+        elif completion.name.startswith("_"):
+            compType = "_" + completion.type
+        else:
+            compType = completion.type
+
+        return compType
+
+    def getCompletions(self, line, index):
+        """
+        Public method to calculate possible completions.
+
+        @param params dictionary containing the method parameters
+        @type dict
+        """
+
+        response = []
+
+        try:
+            completions = self.script.complete(line, index, fuzzy=False)
+            response = [
+                {
+                    "ModulePath": str(completion.module_path),
+                    "Name": completion.name,
+                }
+                for completion in completions
+                if not (
+                        completion.name.startswith("__") and completion.name.endswith("__")
+                )
+            ]
+        except Exception as err:
+            logger.error(str(err))
+        return response

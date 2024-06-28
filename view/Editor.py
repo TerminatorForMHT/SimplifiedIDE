@@ -5,10 +5,10 @@ import autopep8
 from PyQt6.Qsci import QsciScintilla, QsciLexerPython
 from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent, QStringConverter
 from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QMessageBox
 from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont
 
-from conf.config import IMG_PATH, SEP
+from conf.config import IMG_PATH, SEP, MySettings
 from util.code_check import run_pylint_on_code
 from util.jediLib import JdeiLib
 from util.lexer import LEXER_MAP
@@ -194,17 +194,23 @@ class Editor(QsciScintilla):
         # 获取默认的右键菜单
         menu = self.createStandardContextMenu()
 
-        # 添加自定义的操作项
-        run_icon = str(IMG_PATH.joinpath(PurePath('run_green.png')))
-        self.code_run_action = QAction(QIcon(run_icon), f"Run {self.file_name}", self)
-        self.code_run_action.triggered.connect(self.code_run)
-        menu.addAction(self.code_run_action)
+        if self.current_file_path.endswith('.py'):
+            # 添加自定义的操作项
+            run_icon = str(IMG_PATH.joinpath(PurePath('play_green.svg')))
+            self.code_run_action = QAction(QIcon(run_icon), f"Run {self.file_name}", self)
+            self.code_run_action.triggered.connect(self.code_run)
+            menu.addAction(self.code_run_action)
 
         # 显示菜单
         menu.exec(event.globalPos())
 
     def code_run(self):
-        print('debug_mark_debug'.center(100, '+'))
+        env = MySettings.value("default_interpreter")
+        if env:
+            print(f'{env} {self.current_file_path}')
+        else:
+            QMessageBox.warning(self, "执行错误", "请选择基础解释器！")
+
 
     def eventFilter(self, obj, event):
         if obj is self.viewport() and event.type() == QEvent.Type.MouseMove:

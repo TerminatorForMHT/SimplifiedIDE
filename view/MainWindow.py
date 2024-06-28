@@ -1,4 +1,6 @@
+import json
 import logging
+import os
 import sys
 from pathlib import PurePath
 
@@ -10,7 +12,7 @@ from qfluentwidgets import qconfig, isDarkTheme, SplashScreen, FluentTitleBar
 from qfluentwidgets.common.animation import BackgroundAnimationWidget
 from qfluentwidgets.components.widgets.frameless_window import FramelessWindow
 
-from conf.config import IMG_PATH
+from conf.config import IMG_PATH, ROOT_PATH, MySettings
 from ui.style_sheet import ButtonStyleSheet
 
 from view.CreateVenvMessageBox import CreateVenvMessageBox
@@ -22,6 +24,8 @@ ICON = str(IMG_PATH.joinpath(PurePath('snake.svg')))
 
 class MainWindow(BackgroundAnimationWidget, FramelessWindow):
     def __init__(self, parent=None):
+        self.env_file = ROOT_PATH / 'conf' / "env_history.json"
+        self.env_history = self.load_env_history()
         self._isMicaEnabled = False
         self._lightBackgroundColor = QColor(243, 243, 243)
         self._darkBackgroundColor = QColor(32, 32, 32)
@@ -33,6 +37,14 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
         self.setup_ui_elements()
         self.setStyleSheet('background-color: rgba(255, 255, 255, 0)')
         self.show()
+        last_env = MySettings.value("default_interpreter")
+        last_env_name = MySettings.value("default_interpreter_name")
+        if last_env and last_env_name:
+            env_info = {
+                'name': last_env_name,
+                'path': last_env
+            }
+            self.set_default_interpreter(env_info)
 
     def setup_titlebar(self):
         self.setTitleBar(FluentTitleBar(self))
@@ -96,7 +108,6 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
         self.button_widget.layout().setAlignment(Qt.AlignmentFlag.AlignRight)
         self.button_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.widgetLayout.addWidget(self.button_widget)
-        self.interpreter_list = QListWidget()
         self.__changeTimer = QTimer()
         self.__changeTimer.timeout.connect(self.check_syntax)
         self.__changeTimer.start(5000)
@@ -176,42 +187,31 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
 
     def show_history(self):
         menu = QMenu()
-        for index in range(self.interpreter_list.count()):
-            interpreter = self.interpreter_list.item(index).text()
-            action = menu.addAction(interpreter)
-            action.triggered.connect(lambda checked, interp=interpreter: self.set_default_interpreter(interp))
+        for env in self.env_history:
+            action = menu.addAction(env.get('name'))
+            action.triggered.connect(lambda checked: self.set_default_interpreter(env))
         menu.exec(self.dock_btn.mapToGlobal(self.dock_btn.rect().bottomLeft()))
 
     def show_create_venv_dialog(self):
         dialog = CreateVenvMessageBox(self)
+        dialog.mkenv_signal.connect(self.add_interpreter_to_histor)
         dialog.exec()
 
     def delete_virtual_environment(self):
-        selected_item = self.interpreter_list.currentItem()
-        if selected_item:
-            interpreter_path = selected_item.text()
-            confirm = QMessageBox.question(self, "Confirm Delete",
-                                           f"Are you sure you want to delete {interpreter_path}?",
-                                           QMessageBox.Yes | QMessageBox.No)
-            if confirm == QMessageBox.Yes:
-                self.interpreter_list.takeItem(self.interpreter_list.row(selected_item))
-                if interpreter_path == self.dock_btn.text():
-                    self.dock_btn.setChecked('解释器管理')
+        # TODO 待完善
+        pass
 
-    def set_default_interpreter(self, interpreter_path=None):
-        if interpreter_path is None:
-            selected_item = self.interpreter_list.currentItem()
-            if selected_item:
-                interpreter_path = selected_item.text()
-        if interpreter_path:
-            self.dock_btn.setText(interpreter_path)
+    def set_default_interpreter(self, env):
+        env_name = env.get('name')
+        env_path = env.get('path')
+        if env_name and env_path:
+            MySettings.setValue("default_interpreter_name", env_name)
+            MySettings.setValue("default_interpreter", env_path)
+            self.dock_btn.setText(env_name)
 
     def remove_interpreter(self):
-        selected_item = self.interpreter_list.currentItem()
-        if selected_item:
-            self.interpreter_list.takeItem(self.interpreter_list.row(selected_item))
-            if self.dock_btn.text() == selected_item.text():
-                self.dock_btn.setText('解释器管理')
+        # TODO 待完善
+        pass
 
     def check_syntax(self):
         try:
@@ -246,3 +246,17 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
     def resetChangeTimer(self):
         self.__changeTimer.stop()
         self.__changeTimer.start()
+
+    def load_env_history(self):
+        if os.path.exists(self.env_file):
+            with open(self.env_file, 'r') as file:
+                return json.load(file)
+        return []
+
+    def save_penv_history(self):
+        with open(self.env_file, 'w') as file:
+            json.dump(self.env_history, file, indent=4)
+
+    def add_interpreter_to_histor(self, env_info: dict) -> None:
+        self.env_history.append(env_info)
+        self.save_penv_history()

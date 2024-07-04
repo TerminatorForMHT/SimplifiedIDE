@@ -4,7 +4,7 @@ from pathlib import PurePath
 import autopep8
 from PyQt6.Qsci import QsciScintilla, QsciLexerPython
 from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent, QStringConverter
-from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
+from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon, QFontMetrics
 from PyQt6.QtWidgets import QApplication, QMessageBox
 from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont
 
@@ -12,6 +12,7 @@ from conf.config import IMG_PATH, SEP, MySettings
 from util.code_check import run_pylint_on_code
 from util.jediLib import JdeiLib
 from util.lexer import LEXER_MAP
+from view.Lexer import CustomLexerPython
 
 
 class Editor(QsciScintilla):
@@ -22,6 +23,7 @@ class Editor(QsciScintilla):
 
     def __init__(self, parent):
         super(Editor, self).__init__(parent)
+        self.zoom_level = 0
         self.setStyleSheet('margin: 2px;')
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -40,6 +42,10 @@ class Editor(QsciScintilla):
         setFont(self)
 
     def init_ui(self, lexer):
+        font = QFont("Segoe UI", 10)
+        self.setFont(font)
+        self.setMarginsFont(font)
+
         self.setLexer(lexer)
 
         self.setAutoIndent(True)
@@ -47,15 +53,16 @@ class Editor(QsciScintilla):
         self.setIndentationsUseTabs(True)
         self.setTabIndents(True)
         self.setFolding(QsciScintilla.FoldStyle.BoxedTreeFoldStyle)
-        self.setFoldMarginColors(QColor("#F3F3F3"), QColor("#F3F3F3"))
+        self.setFoldMarginColors(QColor("#fafafa"), QColor("#fafafa"))
         self.setMarginType(2, QsciScintilla.MarginType.SymbolMargin)
         self.setIndentationGuides(True)
         self.setMarginType(1, QsciScintilla.MarginType.NumberMargin)
-        self.setMarginsFont(QFont("Courier", 10))
         self.setMarginsBackgroundColor(QColor("#FFFFFF"))
-        self.setMarginsForegroundColor(QColor("#333333"))
+        self.setMarginsForegroundColor(Qt.GlobalColor.gray)
         self.setMarginSensitivity(1, True)
         self.setBraceMatching(QsciScintilla.BraceMatch.SloppyBraceMatch)
+        self.setPaper(QColor("#ffffff"))
+        self.setColor(QColor("#000000"))
 
         self.setMarginLineNumbers(0, True)
         self.setMarginWidth(1, "0000")
@@ -68,7 +75,9 @@ class Editor(QsciScintilla):
         self.setEdgeColumn(80)
         self.setEdgeColor(QColor("#bebebe"))
         self.setCaretLineVisible(True)
-        self.setCaretLineBackgroundColor(QColor("#F3F3F3"))
+        self.setCaretLineBackgroundColor(QColor("#e0e0e0"))
+        self.setCaretForegroundColor(QColor("#0078d7"))
+        self.SendScintilla(QsciScintilla.SCI_SETSELBACK, True, QColor("#d6ebff"))
 
         self.INDICATOR_ERROR = 0
         self.INDICATOR_WARN = 1
@@ -96,7 +105,7 @@ class Editor(QsciScintilla):
     def load_file(self, file_path):
         self.current_file_path = file_path
         file_suffix = file_path.split('.')[-1]
-        lexer = LEXER_MAP.get(f".{file_suffix}", QsciLexerPython)
+        lexer = LEXER_MAP.get(f".{file_suffix}", CustomLexerPython)
         try:
             self.init_ui(lexer())
         except Exception as e:
@@ -141,11 +150,7 @@ class Editor(QsciScintilla):
             self.ensureLineVisible(line + self.SendScintilla(QsciScintilla.SCI_LINESONSCREEN) // 2)
 
     def handle_wheel_event(self, event):
-        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
-            self.zoomIn() if event.pixelDelta().y() > 0 else self.zoomOut()
-            event.accept()
-        else:
-            QsciScintilla.wheelEvent(self, event)
+        QsciScintilla.wheelEvent(self, event)
 
     def reformat(self):
         self.setText(autopep8.fix_code(self.text()))
@@ -210,7 +215,6 @@ class Editor(QsciScintilla):
             print(f'{env} {self.current_file_path}')
         else:
             QMessageBox.warning(self, "执行错误", "请选择基础解释器！")
-
 
     def eventFilter(self, obj, event):
         if obj is self.viewport() and event.type() == QEvent.Type.MouseMove:

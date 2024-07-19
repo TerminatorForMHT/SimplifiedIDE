@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (QHBoxLayout, QWidget, QVBoxLayout, QSplitter, QList
 from qfluentwidgets import qconfig, isDarkTheme, SplashScreen, FluentTitleBar
 from qfluentwidgets.common.animation import BackgroundAnimationWidget
 from qfluentwidgets.components.widgets.frameless_window import FramelessWindow
+from qframelesswindow import TitleBar
 
 from conf.config import IMG_PATH, ROOT_PATH, MySettings
 from ui.style_sheet import ButtonStyleSheet
@@ -177,19 +178,13 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
 
     def show_dock_menu(self):
         menu = QMenu()
-        history_action = menu.addAction("解释器列表")
-        history_action.triggered.connect(self.show_history)
-        create_action = menu.addAction("创建解释器")
-        create_action.triggered.connect(self.show_create_venv_dialog)
-        delete_action = menu.addAction("删除解释器")
-        delete_action.triggered.connect(self.delete_virtual_environment)
-        menu.exec(self.dock_btn.mapToGlobal(self.dock_btn.rect().bottomLeft()))
-
-    def show_history(self):
-        menu = QMenu()
         for env in self.env_history:
             action = menu.addAction(env.get('name'))
             action.triggered.connect(lambda checked: self.set_default_interpreter(env))
+        create_action = menu.addAction("创建解释器")
+        create_action.triggered.connect(self.show_create_venv_dialog)
+        delete_action = menu.addAction("解释器管理")
+        delete_action.triggered.connect(self.delete_virtual_environment)
         menu.exec(self.dock_btn.mapToGlobal(self.dock_btn.rect().bottomLeft()))
 
     def show_create_venv_dialog(self):

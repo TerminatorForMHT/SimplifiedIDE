@@ -4,7 +4,7 @@ from pathlib import PurePath
 import autopep8
 from PyQt6.Qsci import QsciScintilla, QsciLexerPython
 from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent, QStringConverter
-from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon, QFontMetrics
+from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
 from PyQt6.QtWidgets import QApplication, QMessageBox
 from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont
 
@@ -12,7 +12,6 @@ from conf.config import IMG_PATH, SEP, MySettings
 from util.code_check import run_pylint_on_code
 from util.jediLib import JdeiLib
 from util.lexer import LEXER_MAP
-from view.Lexer import CustomLexerPython
 
 
 class Editor(QsciScintilla):
@@ -105,7 +104,7 @@ class Editor(QsciScintilla):
     def load_file(self, file_path):
         self.current_file_path = file_path
         file_suffix = file_path.split('.')[-1]
-        lexer = LEXER_MAP.get(f".{file_suffix}", CustomLexerPython)
+        lexer = LEXER_MAP.get(f".{file_suffix}", QsciLexerPython)
         try:
             self.init_ui(lexer())
         except Exception as e:

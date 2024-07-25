@@ -128,6 +128,7 @@ class Editor(QsciScintilla):
             return
 
     def mousePressEvent(self, event):
+        super().mousePressEvent(event)
         if Qt.KeyboardModifier.ControlModifier:
             if event.modifiers():
                 pos = self.SendScintilla(QsciScintilla.SCI_POSITIONFROMPOINT, int(event.position().x()),
@@ -140,8 +141,6 @@ class Editor(QsciScintilla):
                     "reference_addr": jedi_lib.getReferences(line, index),
                 }
                 self.ctrl_left_click_signal.emit(jump_info)
-        else:
-            super().mousePressEvent(event)
 
     def move_cursor_visible(self, line, index=0):
         if line:

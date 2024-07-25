@@ -1,12 +1,8 @@
 import sys
-import subprocess
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
-    QTextEdit, QPushButton, QLineEdit, QLabel, QMessageBox, QTabWidget,
-    QSplitter, QMenuBar, QToolBar, QFileDialog, QStatusBar, QComboBox,
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QComboBox,
     QTableWidget, QTableWidgetItem, QHeaderView, QAbstractItemView
 )
-from PyQt6.QtCore import Qt, QProcess
 
 
 class PackageManagement(QWidget):
@@ -28,6 +24,7 @@ class PackageManagement(QWidget):
         self.package_table.setHorizontalHeaderLabels(["软件包", "版本", "最新版本"])
         self.package_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.package_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+
         self.package_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
         self.load_packages()

@@ -2,12 +2,13 @@ import json
 import os
 
 from PyQt6.QtCore import Qt, QDir, pyqtSignal
-from PyQt6.QtGui import QFileSystemModel
+from PyQt6.QtGui import QFileSystemModel, QIcon
 from PyQt6.QtWidgets import QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QMessageBox, QInputDialog, QFileDialog
 from qfluentwidgets import TreeView, FluentIcon, DropDownPushButton, RoundMenu, Action
 
 from conf.config import MySettings, ROOT_PATH
 from view.CodeWidget import CodeWidget
+from view.CustomFileSystemModel import CustomFileSystemModel
 
 
 class UserInterface(QWidget):
@@ -38,7 +39,7 @@ class UserInterface(QWidget):
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
         self.main_layout.addWidget(self.splitter)
 
-        self.file_system_model = QFileSystemModel()
+        self.file_system_model = CustomFileSystemModel()
         self.file_system_model.setRootPath(QDir.rootPath())
 
         self.left_widget = QWidget()

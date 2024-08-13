@@ -3,9 +3,9 @@ from pathlib import PurePath
 
 import autopep8
 from PyQt6.Qsci import QsciScintilla, QsciLexerPython
-from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent, QStringConverter
+from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent, QStringConverter, QPoint
 from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
-from PyQt6.QtWidgets import QApplication, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMessageBox, QListWidgetItem, QListWidget
 from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont
 
 from conf.config import IMG_PATH, SEP, MySettings
@@ -19,6 +19,7 @@ class Editor(QsciScintilla):
     Python代码编辑器实现类
     """
     ctrl_left_click_signal = pyqtSignal(dict)
+    completion_text_signal = pyqtSignal(list)
 
     def __init__(self, parent):
         super(Editor, self).__init__(parent)
@@ -65,11 +66,6 @@ class Editor(QsciScintilla):
 
         self.setMarginLineNumbers(0, True)
         self.setMarginWidth(1, "0000")
-        self.setAutoCompletionSource(QsciScintilla.AutoCompletionSource.AcsAll)
-        self.setAutoCompletionThreshold(1)
-        self.setAutoCompletionCaseSensitivity(True)
-        self.setAutoCompletionReplaceWord(True)
-        self.setAutoCompletionUseSingle(QsciScintilla.AutoCompletionUseSingle.AcusExplicit)
         self.setEdgeMode(QsciScintilla.EdgeMode.EdgeLine)
         self.setEdgeColumn(80)
         self.setEdgeColor(QColor("#bebebe"))
@@ -93,6 +89,15 @@ class Editor(QsciScintilla):
         self.setMarkerForegroundColor(QColor("#FFFFFF"), QsciScintilla.SC_MARKNUM_FOLDER)
         self.setMarkerBackgroundColor(QColor("#0078D7"), QsciScintilla.SC_MARKNUM_FOLDEROPEN)
         self.setMarkerForegroundColor(QColor("#FFFFFF"), QsciScintilla.SC_MARKNUM_FOLDEROPEN)
+
+        # 创建一个 QListWidget 作为补全列表
+        self.completion_list = QListWidget()
+        self.completion_list.setWindowFlags(Qt.WindowType.Popup)
+        self.completion_list.itemClicked.connect(self.insert_completion)
+
+        self.textChanged.connect(self.getCompletions)
+        # 用于避免递归的标志
+        self.updating_completion_list = False
 
     def init_actions(self):
         self.save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
@@ -182,16 +187,24 @@ class Editor(QsciScintilla):
                 logging.error(e)
             self.syntax_errors = run_pylint_on_code(self.current_file_path)
             self.SendScintilla(QsciScintilla.SCI_INDICATORCLEARRANGE)
+            jedi_lib = JdeiLib(source=self.text(), filename=self.current_file_path)
+            syntax_errors = jedi_lib.get_syntax_errors()
+            # print(f'Debug_MARK_DEBUG'.center(100, '-') + f'\n:syntax_errors: {syntax_errors}')
             for error in self.syntax_errors:
                 self.add_wavy_underline(error.get('line'), error.get('column'), error.get('endLine'),
                                         error.get('endColumn'), 'E' not in error.get('message-id') and
                                         'F' not in error.get('message-id'))
 
     def get_cursor_pos(self):
-        cursor_pos = self.SendScintilla(self.SCI_GETCURRENTPOS)
-        cursor_line = self.SendScintilla(self.SCI_LINEFROMPOSITION, cursor_pos)
-        cursor_index = cursor_pos - self.SendScintilla(self.SCI_POSITIONFROMLINE, cursor_line)
-        return cursor_index, cursor_line
+        # 获取当前光标的位置
+        cursor_position = self.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS)
+        # 获取行号
+        line, _ = self.lineIndexFromPosition(cursor_position)
+        # 获取该行的起始位置
+        line_start_position = self.SendScintilla(QsciScintilla.SCI_POSITIONFROMLINE, line)
+        # 计算列号（当前光标位置 - 行起始位置）
+        column = cursor_position - line_start_position
+        return line + 1, column + 1
 
     def contextMenuEvent(self, event):
         # 获取默认的右键菜单
@@ -258,3 +271,67 @@ class Editor(QsciScintilla):
             start, end = self.underlined_word_range
             self.SendScintilla(QsciScintilla.SCI_INDICATORCLEARRANGE, start, end - start)
             self.underlined_word_range = None
+
+    def on_text_changed(self):
+        # 防止递归调用导致的卡死
+        if self.updating_completion_list:
+            return
+
+        # 开始更新补全列表
+        self.updating_completion_list = True
+        self.getCompletions()
+        self.updating_completion_list = False
+
+    def getCompletions(self):
+        self.completion_list.clear()
+        jedi_lib = JdeiLib(source=self.text(), filename=self.current_file_path)
+        line, index = self.get_cursor_pos()
+        completions = jedi_lib.getCompletions(line, index)
+        if len(completions) < 1:
+            return
+        for word in completions:
+            item = QListWidgetItem(word)
+            self.completion_list.addItem(item)
+
+        # 获取光标位置并显示补全列表
+        cursor_position = self.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS)
+        x = self.SendScintilla(QsciScintilla.SCI_POINTXFROMPOSITION, 0, cursor_position)
+        y = self.SendScintilla(QsciScintilla.SCI_POINTYFROMPOSITION, 0, cursor_position)
+
+        # 将该位置映射到全局坐标系
+        global_pos = self.mapToGlobal(QPoint(x, y + self.textHeight(cursor_position)))
+
+        # 调整补全列表显示位置
+        self.completion_list.move(global_pos)
+        self.completion_list.setCurrentRow(0)
+        self.completion_list.show()
+
+    def insert_completion(self, item):
+        # 插入选中的补全项
+        word = item.text()
+        self.insert(word)
+        self.completion_list.hide()
+
+    def keyPressEvent(self, event):
+        # 覆写 keyPressEvent 以处理 Tab 和上下箭头选择
+        if self.completion_list.isVisible():
+            if event.key() == Qt.Key.Key_Tab:
+                # 选择第一个补全项
+                current_item = self.completion_list.currentItem()
+                self.insert_completion(current_item)
+                self.completion_list.hide()
+                return
+            elif event.key() == Qt.Key.Key_Up:
+                # 上下箭头切换选项
+                current_row = self.completion_list.currentRow()
+                self.completion_list.setCurrentRow(max(0, current_row - 1))
+                return
+            elif event.key() == Qt.Key.Key_Down:
+                current_row = self.completion_list.currentRow()
+                self.completion_list.setCurrentRow(min(self.completion_list.count() - 1, current_row + 1))
+                return
+            elif event.key() == Qt.Key.Key_Escape:
+                self.completion_list.hide()
+                return
+
+        super().keyPressEvent(event)

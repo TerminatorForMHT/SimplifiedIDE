@@ -200,26 +200,20 @@ class JdeiLib:
 
     def getCompletions(self, line, index):
         """
-        Public method to calculate possible completions.
+        用于计算可能完成的公共方法。
 
         @param params dictionary containing the method parameters
         @type dict
         """
-
         response = []
 
         try:
             completions = self.script.complete(line, index, fuzzy=False)
-            response = [
-                {
-                    "ModulePath": str(completion.module_path),
-                    "Name": completion.name,
-                }
-                for completion in completions
-                if not (
-                        completion.name.startswith("__") and completion.name.endswith("__")
-                )
-            ]
+            for completion in completions:
+                if not (completion.name.startswith("__")
+                        and completion.name.endswith("__")):
+                    response.append(completion.name)
         except Exception as err:
             logger.error(str(err))
+
         return response

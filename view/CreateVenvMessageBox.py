@@ -1,11 +1,10 @@
 import os
-import subprocess
 
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
 from qfluentwidgets import MessageBoxBase, SubtitleLabel, LineEdit, ComboBox
 
-from util.common_method import find_python_paths
+from util.common_method import find_python_paths, create_and_activate_virtual_environment
 
 
 class CreateVenvMessageBox(MessageBoxBase):
@@ -54,17 +53,8 @@ class CreateVenvMessageBox(MessageBoxBase):
             return
 
         full_venv_path = os.path.join(venv_path, venv_name)
-        try:
-            subprocess.run([base_interpreter, '-m', 'venv', full_venv_path], check=True)
-            interpreter_path = os.path.join(
-                full_venv_path, 'Scripts', 'python.exe') if os.name == 'nt' else os.path.join(
-                full_venv_path, 'bin', 'python')
-            env_info = {
-                'name': venv_name,
-                'path': interpreter_path,
-            }
-            self.mkenv_signal.emit(env_info)
-            QMessageBox.information(self, "Success", f"虚拟环境已创建于 {full_venv_path}")
-            self.accept()
-        except subprocess.CalledProcessError as e:
-            QMessageBox.critical(self, "Error", f"创建虚拟环境失败:\n{e}")
+        ret = create_and_activate_virtual_environment(full_venv_path, venv_name, base_interpreter)
+        if ret[0] == 0:
+            QMessageBox.information(self, '创建成功', ret[1])
+        else:
+            QMessageBox.warning(self, "创建失败", ret[1])

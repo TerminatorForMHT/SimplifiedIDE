@@ -1,5 +1,7 @@
 import os
+import subprocess
 from pathlib import Path
+from sys import platform
 
 
 def find_python_paths():
@@ -42,3 +44,25 @@ def find_python_paths():
                     python_paths.add(str(potential_path.resolve()))
 
     return sorted(python_paths)
+
+
+def create_and_activate_virtual_environment(target_path, env_name, base_python_path):
+    env_path = os.path.join(target_path, env_name)
+    try:
+        # Create virtual environment
+        subprocess.run([base_python_path, '-m', 'venv', env_path], check=True)
+        print(f"Virtual environment '{env_name}' created successfully at {env_path}")
+
+        # Determine the activation command based on the operating system
+        if platform == "Windows":
+            activate_command = os.path.join(env_path, 'Scripts', 'activate')
+            activation_cmd = f'cmd /k "{activate_command}"'
+        else:
+            activate_command = os.path.join(env_path, 'bin', 'activate')
+            activation_cmd = f'bash --rcfile <(echo ". {activate_command}")'
+
+        # Activate the virtual environment
+        subprocess.run(activation_cmd, shell=True)
+        return (0, f"Virtual environment '{env_name}' activated.")
+    except subprocess.CalledProcessError as e:
+        return (1, f"Error occurred while creating or activating virtual environment: {e}")

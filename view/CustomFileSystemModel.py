@@ -10,7 +10,6 @@ from util.suffixMap2name import suffixMap
 class CustomFileSystemModel(QFileSystemModel):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.python_icon = QIcon(str(IMG_PATH.joinpath(PurePath(f'Python.svg'))))  # 指定Python图标的路径
 
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if role == Qt.ItemDataRole.DecorationRole:

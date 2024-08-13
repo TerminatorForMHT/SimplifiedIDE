@@ -38,6 +38,7 @@ class CodeWidget(QWidget):
         editor = Editor(self)
         editor.load_file(file_path)
         editor.ctrl_left_click_signal.connect(self.handle_ctrl_left_click)
+        # editor.completion_text_signal.connect(self.show_completion_list)
         self.stacked_widget.addWidget(editor)
 
         index = self.stacked_widget.count() - 1

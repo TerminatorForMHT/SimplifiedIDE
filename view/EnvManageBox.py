@@ -12,8 +12,7 @@ class EnvManageBox(QWidget):
 
     def __init__(self, parent=None):
         super(EnvManageBox, self).__init__(parent)
-        self.env_file = ROOT_PATH / 'conf' / "env_history.json"
-        self.env_history = self.load_env_history()
+        self.setup_env()
 
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
@@ -22,6 +21,13 @@ class EnvManageBox(QWidget):
         self.top_widget.setLayout(self.top_layout)
         self.setup_top()
         self.setup_interpreter_info()
+
+    def setup_env(self):
+        self.env_file = ROOT_PATH / 'conf' / "env_history.json"
+        self.env_history = self.load_env_history()
+        self.env_path = MySettings.Value("default_interpreter")
+        if self.env_path and self.env_path.exists():
+            pass
 
     def setup_top(self):
         self.line_edit = QLabel(self)

@@ -213,7 +213,7 @@ class JdeiLib:
                 if not (completion.name.startswith("__")
                         and completion.name.endswith("__")):
                     response.append(completion.name)
-        except Exception as err:
-            logger.error(str(err))
+        except Exception:
+            pass
 
         return response

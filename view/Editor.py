@@ -5,7 +5,7 @@ import autopep8
 from PyQt6.Qsci import QsciScintilla, QsciLexerPython
 from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent, QStringConverter, QPoint, QTimer
 from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
-from PyQt6.QtWidgets import QApplication, QMessageBox, QListWidgetItem, QListWidget, QAbstractItemView
+from PyQt6.QtWidgets import QApplication, QMessageBox, QListWidget
 from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont
 
 from conf.config import IMG_PATH, SEP, MySettings
@@ -273,22 +273,7 @@ class Editor(QsciScintilla):
             self.SendScintilla(QsciScintilla.SCI_INDICATORCLEARRANGE, start, end - start)
             self.underlined_word_range = None
 
-    def get_word_before_cursor(self):
-        # 获取光标的当前位置
-        current_pos = self.SendScintilla(QsciScintilla.SCI_GETCURRENTPOS)
-
-        # 获取光标前一个单词的开始位置
-        word_start_pos = self.SendScintilla(QsciScintilla.SCI_WORDSTARTPOSITION, current_pos, True)
-
-        # 如果光标位置和单词开始位置不相同
-        if word_start_pos < current_pos:
-            return self.text()[word_start_pos:current_pos]
-        return ""
-
     def show_completion(self):
-        cursor_word = self.get_word_before_cursor()
-        if cursor_word == "":
-            return
 
         # 获取Jedi补全
         jedi_lib = JdeiLib(source=self.text(), filename=self.current_file_path)

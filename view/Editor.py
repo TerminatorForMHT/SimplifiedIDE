@@ -160,7 +160,15 @@ class Editor(QsciScintilla):
         QsciScintilla.wheelEvent(self, event)
 
     def reformat(self):
+        self.textChanged.disconnect(self.show_completion)
         self.setText(autopep8.fix_code(self.text()))
+        # 获取文本的最后一行和最后一行的文本长度
+        last_line = self.lines() - 1
+        last_column = self.lineLength(last_line)
+
+        # 将光标移动到最后一行的末尾
+        self.setCursorPosition(last_line, last_column)
+        self.textChanged.connect(self.show_completion)
 
     def comment_selected(self):
         if self.selectedText():
@@ -274,10 +282,15 @@ class Editor(QsciScintilla):
             self.underlined_word_range = None
 
     def show_completion(self):
+        line, index = self.get_cursor_pos()
+        current_line_text = self.text(line - 1).strip()
+
+        if not current_line_text or current_line_text in ["", "\n"]:
+            self.completion_list_widget.hide()
+            return
 
         # 获取Jedi补全
         jedi_lib = JdeiLib(source=self.text(), filename=self.current_file_path)
-        line, index = self.get_cursor_pos()
         completion_list = jedi_lib.getCompletions(line, index)
 
         if completion_list:

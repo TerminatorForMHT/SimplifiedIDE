@@ -1,14 +1,18 @@
 import json
 import os
+import subprocess
+import sys
+from pathlib import Path
 
-from PyQt6.QtCore import Qt, QDir, pyqtSignal
-from PyQt6.QtGui import QFileSystemModel, QIcon
-from PyQt6.QtWidgets import QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QMessageBox, QInputDialog, QFileDialog
-from qfluentwidgets import TreeView, FluentIcon, DropDownPushButton, RoundMenu, Action
+from PyQt6.QtCore import Qt, QDir, pyqtSignal, QModelIndex
+from PyQt6.QtGui import QFileSystemModel, QIcon, QCursor
+from PyQt6.QtWidgets import QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QMessageBox, QInputDialog, QFileDialog, QMenu
+from qfluentwidgets import TreeView, FluentIcon, DropDownPushButton, RoundMenu, Action, MessageBox
 
 from conf.config import MySettings, ROOT_PATH
 from view.CodeWidget import CodeWidget
 from view.CustomFileSystemModel import CustomFileSystemModel
+from view.InputDialog import InputDialog
 
 
 class UserInterface(QWidget):
@@ -19,6 +23,7 @@ class UserInterface(QWidget):
         self.history_file = ROOT_PATH / 'conf' / "project_history.json"
         self.project_history = self.load_project_history()
         self.last_opened_file = None
+        self.project_path = None
         self.init_ui()
         self.load_settings()
         if self.last_opened_file:
@@ -50,6 +55,9 @@ class UserInterface(QWidget):
         self.tree_view.setHeaderHidden(True)
         self.tree_view.setRootIndex(self.file_system_model.index(QDir.rootPath()))
         self.tree_view.doubleClicked.connect(self.on_tree_view_double_clicked)
+        self.tree_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.tree_view.customContextMenuRequested.connect(self.show_context_menu)
+
         for i in range(1, 4):
             self.tree_view.setColumnHidden(i, True)
         left_layout.addWidget(self.tree_view)
@@ -155,6 +163,7 @@ class UserInterface(QWidget):
 
     def open_project(self, path):
         if os.path.exists(path):
+            self.project_path = path
             self.tree_view.setRootIndex(self.file_system_model.index(path))
             self.last_opened_file = path
             self.save_settings()
@@ -171,3 +180,106 @@ class UserInterface(QWidget):
     def save_settings(self):
         MySettings.setValue("lastProject", self.project_history)
         MySettings.setValue("lastOpenedFile", self.last_opened_file)
+
+    def show_context_menu(self, position):
+        index = self.tree_view.indexAt(position)
+        menu = RoundMenu()
+        if not index.isValid():
+            menu.addAction(Action(FluentIcon.ADD, "新建文件", triggered=lambda: self.create_item_root("file")))
+
+            menu.addAction(Action(FluentIcon.ADD, "新建文件夹", triggered=lambda: self.create_item_root("folder")))
+
+            menu.addAction(Action(FluentIcon.ADD, "新建Python包", triggered=lambda: self.create_item_root("package")))
+
+            menu.addAction(
+                Action(FluentIcon.ADD, "新建Python文件", triggered=lambda: self.create_item_root("python_file")))
+        else:
+
+            is_directory = self.file_system_model.isDir(index)
+
+            if is_directory:
+                menu.addAction(Action(FluentIcon.ADD, "新建文件", triggered=lambda: self.create_item(index, "file")))
+
+                menu.addAction(
+                    Action(FluentIcon.ADD, "新建文件夹", triggered=lambda: self.create_item(index, "folder")))
+
+                menu.addAction(
+                    Action(FluentIcon.ADD, "新建Python包", triggered=lambda: self.create_item(index, "package")))
+
+                menu.addAction(
+                    Action(FluentIcon.ADD, "新建Python文件", triggered=lambda: self.create_item(index, "python_file")))
+
+            menu.addAction(Action(FluentIcon.GLOBE, "从本地路径打开", triggered=lambda: self.open_local_path(index)))
+        menu.exec(QCursor.pos())
+
+    def create_item(self, index, item_type: str):
+        file_path_str = self.file_system_model.filePath(index)
+        file_path = Path(file_path_str)
+        input_dialog = InputDialog(f"新建{item_type}", f"输入新{item_type}的名称:", self)
+
+        def func():
+            name = input_dialog.urlLineEdit.text()
+            if item_type == "folder":
+                new_path = Path(file_path) / name
+                new_path.mkdir(exist_ok=True)
+            elif item_type == "package":
+                new_path = Path(file_path) / name
+                new_path.mkdir(exist_ok=True)
+                init_file = new_path / "__init__.py"
+                init_file.touch()
+            elif item_type == "python_file":
+                new_path = Path(file_path) / f"{name}.py"
+                new_path.touch()
+            elif item_type == "file":
+                new_path = Path(file_path) / name
+                new_path.touch()
+            else:
+                m_box = MessageBox("错误", f"未知的创建类型: {item_type}")
+                m_box.exec()
+            input_dialog.accept()
+
+        input_dialog.yesButton.clicked.connect(func)
+        input_dialog.show()
+
+    def open_local_path(self, index: QModelIndex):
+        file_path_str = self.file_system_model.filePath(index)
+        file_path = Path(file_path_str)
+        if Path(file_path).exists():
+            if sys.platform == "win32":
+                command = f'explorer /select,"{file_path}"'
+                os.system(command)
+            elif sys.platform == "darwin":
+                subprocess.run(["open", "-R", file_path])
+            else:
+                os.system(f"xdg-open {file_path}")
+        else:
+            m_box = MessageBox("错误", "路径不存在!")
+            m_box.exec()
+
+    def create_item_root(self, item_type: str):
+        file_path = Path(self.project_path)
+        input_dialog = InputDialog(f"新建{item_type}", f"输入新{item_type}的名称:", self)
+
+        def func():
+            name = input_dialog.urlLineEdit.text()
+            if item_type == "folder":
+                new_path = Path(file_path) / name
+                new_path.mkdir(exist_ok=True)
+            elif item_type == "package":
+                new_path = Path(file_path) / name
+                new_path.mkdir(exist_ok=True)
+                init_file = new_path / "__init__.py"
+                init_file.touch()
+            elif item_type == "python_file":
+                new_path = Path(file_path) / f"{name}.py"
+                new_path.touch()
+            elif item_type == "file":
+                new_path = Path(file_path) / name
+                new_path.touch()
+            else:
+                m_box = MessageBox("错误", f"未知的创建类型: {item_type}")
+                m_box.exec()
+            input_dialog.accept()
+
+        input_dialog.yesButton.clicked.connect(func)
+        input_dialog.show()

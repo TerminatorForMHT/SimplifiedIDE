@@ -248,10 +248,10 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
                 return json.load(file)
         return []
 
-    def save_penv_history(self):
+    def save_env_history(self):
         with open(self.env_file, 'w') as file:
             json.dump(self.env_history, file, indent=4)
 
     def add_interpreter_to_histor(self, env_info: dict) -> None:
         self.env_history.append(env_info)
-        self.save_penv_history()
+        self.save_env_history()

@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -7,7 +8,7 @@ from pathlib import Path
 from PyQt6.QtCore import Qt, QDir, pyqtSignal, QModelIndex
 from PyQt6.QtGui import QFileSystemModel, QIcon, QCursor
 from PyQt6.QtWidgets import QSplitter, QWidget, QVBoxLayout, QHBoxLayout, QMessageBox, QInputDialog, QFileDialog, QMenu
-from qfluentwidgets import TreeView, FluentIcon, DropDownPushButton, RoundMenu, Action, MessageBox
+from qfluentwidgets import TreeView, FluentIcon, DropDownPushButton, RoundMenu, Action, MessageBox, Dialog
 
 from conf.config import MySettings, ROOT_PATH
 from view.CodeWidget import CodeWidget
@@ -209,6 +210,8 @@ class UserInterface(QWidget):
                 menu.addAction(
                     Action(FluentIcon.ADD, "新建Python文件", triggered=lambda: self.create_item(index, "python_file")))
 
+            menu.addAction(Action(FluentIcon.DELETE, "删除", triggered=lambda: self.delete_item(index)))
+
             menu.addAction(Action(FluentIcon.GLOBE, "从本地路径打开", triggered=lambda: self.open_local_path(index)))
         menu.exec(QCursor.pos())
 
@@ -283,3 +286,42 @@ class UserInterface(QWidget):
 
         input_dialog.yesButton.clicked.connect(func)
         input_dialog.show()
+
+    def delete_item(self, index):
+        file_path_str = self.file_system_model.filePath(index)
+        file_path = Path(file_path_str)
+
+        if not file_path.exists():
+            w = Dialog("错误", "路径不存在!", self)
+            w.cancelButton.hide()
+            w.buttonLayout.insertStretch(1)
+            w.show()
+            if w.exec():
+                w.hide()
+
+        x = MessageBox("确认操作", "是否删除？", self)
+
+        if x.exec():
+            try:
+                if file_path.is_dir():
+                    os.rmdir(file_path)
+                else:
+                    os.remove(file_path)
+                self.file_system_model.remove(index)
+            except Exception as e:
+                log_str = str(e)
+                if 'directory not empty' in log_str.lower():
+                    y = MessageBox("非空文件夹", "是否删除？", self)
+                    if y.exec():
+                        shutil.rmtree(file_path)
+                    else:
+                        y.hide()
+                    return
+                y = Dialog("错误", f"删除失败: {log_str}", self)
+                y.cancelButton.hide()
+                y.buttonLayout.insertStretch(1)
+                y.show()
+                if y.exec():
+                    y.hide()
+        else:
+            x.hide()

@@ -122,6 +122,7 @@ class UserInterface(QWidget):
 
     def open_folder(self):
         folder_path = QFileDialog.getExistingDirectory(self, "Open Folder", QDir.homePath())
+        self.project_path = folder_path
         if folder_path:
             self.tree_view.setRootIndex(self.file_system_model.index(folder_path))
             self.add_project_to_history(os.path.basename(folder_path), folder_path)

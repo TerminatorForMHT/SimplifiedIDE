@@ -16,6 +16,8 @@ class CodeWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.init_ui()
+        self.load_file_dict = dict()
+        self.tab_texts = list()
 
     def init_ui(self):
         self.layout = QVBoxLayout(self)
@@ -35,22 +37,38 @@ class CodeWidget(QWidget):
         self.add_new_tab(file_path)
 
     def add_new_tab(self, file_path):
-        editor = Editor(self)
-        editor.load_file(file_path)
-        editor.ctrl_left_click_signal.connect(self.handle_ctrl_left_click)
-        # editor.completion_text_signal.connect(self.show_completion_list)
-        self.stacked_widget.addWidget(editor)
+        if file_path not in self.load_file_dict.keys():
+            editor = Editor(self)
+            editor.load_file(file_path)
+            editor.ctrl_left_click_signal.connect(self.handle_ctrl_left_click)
+            self.stacked_widget.addWidget(editor)
 
-        index = self.stacked_widget.count() - 1
-        self.tab_bar.addTab(index, file_path.split(SEP)[-1])
-        self.tab_bar.setCurrentTab(index)
-        self.stacked_widget.setCurrentWidget(editor)
-        return editor
+            index = self.stacked_widget.count() - 1
+            tab_text = file_path.split(SEP)[-1]
+            if tab_text in self.tab_texts:
+                self.tab_texts.append(tab_text)
+                tab_text = f'{ file_path.split(SEP)[-2]}{SEP}{tab_text}'
+                self.tab_bar.addTab(file_path, tab_text)
+            else:
+                self.tab_texts.append(tab_text)
+                self.tab_bar.addTab(file_path, tab_text)
+            self.tab_bar.setCurrentTab(index)
+            self.stacked_widget.setCurrentWidget(editor)
+            self.load_file_dict[file_path] = index
+            return editor
+        else:
+            index = self.load_file_dict.get(file_path)
+            self.tab_bar.setCurrentIndex(index)
+            self.stacked_widget.setCurrentIndex(index)
+            tab = self.stacked_widget.currentWidget()
+            return tab
 
     def close_tab(self, index):
         if self.stacked_widget.count() > 0:
             widget = self.stacked_widget.widget(index)
-            widget.deleteLater()
+            file_path = widget.current_file_path
+            self.tab_texts.remove(file_path.split(SEP)[-1])
+            del self.load_file_dict[file_path]
             self.stacked_widget.removeWidget(widget)
             self.tab_bar.removeTab(index)
 

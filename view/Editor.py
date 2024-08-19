@@ -6,7 +6,7 @@ from PyQt6.Qsci import QsciScintilla, QsciLexerPython
 from PyQt6.QtCore import QFile, QTextStream, Qt, pyqtSignal, QEvent, QStringConverter, QPoint, QTimer
 from PyQt6.QtGui import QColor, QShortcut, QKeySequence, QFont, QAction, QIcon
 from PyQt6.QtWidgets import QApplication, QMessageBox, QListWidget
-from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont
+from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont, ListWidget
 
 from conf.config import IMG_PATH, SEP, MySettings
 from util.code_check import run_pylint_on_code
@@ -24,6 +24,8 @@ class Editor(QsciScintilla):
     def __init__(self, parent):
         super(Editor, self).__init__(parent)
         self.zoom_level = 0
+        # 实用ListWidget会造成显示问题
+        # self.completion_list_widget = ListWidget(self)
         self.completion_list_widget = QListWidget(self)
         self.completion_list_widget.setWindowFlags(Qt.WindowType.ToolTip)
         self.completion_list_widget.hide()
@@ -171,6 +173,7 @@ class Editor(QsciScintilla):
         self.textChanged.connect(self.show_completion)
 
     def comment_selected(self):
+        self.textChanged.disconnect(self.show_completion)
         if self.selectedText():
             lines = self.selectedText().split('\n')
             commented = [f"# {line}" if not line.startswith("#") else line[2:] for line in lines]
@@ -181,6 +184,7 @@ class Editor(QsciScintilla):
             new_text = f"# {ori_text}" if not ori_text.startswith("#") else ori_text[2:]
             self.setSelection(line, 0, line, len(ori_text))
             self.replaceSelectedText(new_text)
+        self.textChanged.connect(self.show_completion)
 
     def add_wavy_underline(self, start_line, start_index, end_line, end_index, is_warn):
         color = '#ffcc00' if is_warn else 'red'
@@ -285,7 +289,14 @@ class Editor(QsciScintilla):
         line, index = self.get_cursor_pos()
         current_line_text = self.text(line - 1).strip()
 
+        # Check if the last typed character is a colon
+        if current_line_text.endswith(':'):
+            self.completion_list_widget.clear()
+            self.completion_list_widget.hide()
+            return
+
         if not current_line_text or current_line_text in ["", "\n"]:
+            self.completion_list_widget.clear()
             self.completion_list_widget.hide()
             return
 

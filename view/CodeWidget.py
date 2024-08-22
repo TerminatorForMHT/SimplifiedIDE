@@ -52,13 +52,13 @@ class CodeWidget(QWidget):
             else:
                 self.tab_texts.append(tab_text)
                 self.tab_bar.addTab(file_path, tab_text)
-            self.tab_bar.setCurrentTab(index)
+            self.tab_bar.setCurrentTab(file_path)
             self.stacked_widget.setCurrentWidget(editor)
             self.load_file_dict[file_path] = index
             return editor
         else:
             index = self.load_file_dict.get(file_path)
-            self.tab_bar.setCurrentIndex(index)
+            self.tab_bar.setCurrentTab(file_path)
             self.stacked_widget.setCurrentIndex(index)
             tab = self.stacked_widget.currentWidget()
             return tab

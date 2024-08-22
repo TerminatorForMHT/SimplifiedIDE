@@ -13,8 +13,9 @@ from view.Editor import Editor
 class CodeWidget(QWidget):
     open_file_signal = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
         self.init_ui()
         self.load_file_dict = dict()
         self.tab_texts = list()
@@ -41,6 +42,7 @@ class CodeWidget(QWidget):
             editor = Editor(self)
             editor.load_file(file_path)
             editor.ctrl_left_click_signal.connect(self.handle_ctrl_left_click)
+            editor.code_execut_signal.connect(self.parent.parent.show_exec_log)
             self.stacked_widget.addWidget(editor)
 
             index = self.stacked_widget.count() - 1

@@ -78,7 +78,7 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
         self.widgetLayout.addWidget(self.mainWidget)
         self.setLayout(self.hBoxLayout)
         self.splitter = QSplitter(Qt.Orientation.Vertical)
-        self.user_interface = UserInterface()
+        self.user_interface = UserInterface(self)
         self.user_interface.open_file_signal.connect(self.resetChangeTimer)
         self.dock_widget = DockWidget(self)
         self.dock_widget.hide_signal.connect(self.hide_dock)
@@ -255,3 +255,11 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
     def add_interpreter_to_histor(self, env_info: dict) -> None:
         self.env_history.append(env_info)
         self.save_env_history()
+
+    def show_exec_log(self, result: tuple):
+        stdout = result[0]
+        stderr = result[1]
+        returncode = result[2]
+        self.dock_widget.stacked_widget.setCurrentWidget(self.dock_widget.log_widget)
+        self.dock_widget.show()
+        self.dock_widget.info_widget.setText(stdout)

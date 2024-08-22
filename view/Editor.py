@@ -1,4 +1,5 @@
 import logging
+import subprocess
 from pathlib import PurePath
 
 import autopep8
@@ -10,6 +11,7 @@ from qfluentwidgets import SmoothScrollDelegate, FluentStyleSheet, setFont, List
 
 from conf.config import IMG_PATH, SEP, MySettings
 from util.code_check import run_pylint_on_code
+from util.code_executor import PythonExecutor
 from util.jediLib import JdeiLib
 from util.lexer import LEXER_MAP
 
@@ -19,7 +21,7 @@ class Editor(QsciScintilla):
     Python代码编辑器实现类
     """
     ctrl_left_click_signal = pyqtSignal(dict)
-    completion_text_signal = pyqtSignal(list)
+    code_execut_signal = pyqtSignal(tuple)
 
     def __init__(self, parent):
         super(Editor, self).__init__(parent)
@@ -234,11 +236,12 @@ class Editor(QsciScintilla):
         menu.exec(event.globalPos())
 
     def code_run(self):
-        env = MySettings.value("default_interpreter")
-        if env:
-            print(f'{env} {self.current_file_path}')
-        else:
-            QMessageBox.warning(self, "执行错误", "请选择基础解释器！")
+        runner = PythonExecutor()
+        runner.execute_file(self.current_file_path)
+        log = runner.stdout
+        error = runner.stderr
+        returncode = runner.returncode
+        self.code_execut_signal.emit((log, error, returncode))
 
     def eventFilter(self, obj, event):
         if obj is self.viewport() and event.type() == QEvent.Type.MouseMove:

@@ -19,8 +19,9 @@ from view.InputDialog import InputDialog
 class UserInterface(QWidget):
     open_file_signal = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
+        self.parent = parent
         self.history_file = ROOT_PATH / 'conf' / "project_history.json"
         self.project_history = self.load_project_history()
         self.last_opened_file = None

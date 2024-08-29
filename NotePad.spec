@@ -26,7 +26,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='NotePad',
+    name='Notepad',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

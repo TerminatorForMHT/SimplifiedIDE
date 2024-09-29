@@ -18,6 +18,7 @@ from ui.style_sheet import ButtonStyleSheet
 
 from view.CreateVenvMessageBox import CreateVenvMessageBox
 from view.DockWidget import DockWidget
+from view.EnvManageBox import EnvManageBox
 from view.UserInterface import UserInterface
 
 ICON = str(IMG_PATH.joinpath(PurePath('snake.svg')))
@@ -25,6 +26,7 @@ ICON = str(IMG_PATH.joinpath(PurePath('snake.svg')))
 
 class MainWindow(BackgroundAnimationWidget, FramelessWindow):
     def __init__(self, parent=None):
+        self.manage_box = None
         self.env_file = ROOT_PATH / 'conf' / "env_history.json"
         self.env_history = self.load_env_history()
         self._isMicaEnabled = False
@@ -184,7 +186,7 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
         create_action = menu.addAction("创建解释器")
         create_action.triggered.connect(self.show_create_venv_dialog)
         delete_action = menu.addAction("解释器管理")
-        delete_action.triggered.connect(self.delete_virtual_environment)
+        delete_action.triggered.connect(self.manage_virtual_environment)
         menu.exec(self.dock_btn.mapToGlobal(self.dock_btn.rect().bottomLeft()))
 
     def show_create_venv_dialog(self):
@@ -192,9 +194,9 @@ class MainWindow(BackgroundAnimationWidget, FramelessWindow):
         dialog.mkenv_signal.connect(self.add_interpreter_to_histor)
         dialog.exec()
 
-    def delete_virtual_environment(self):
-        # TODO 待完善
-        pass
+    def manage_virtual_environment(self):
+        self.manage_box = EnvManageBox()
+        self.manage_box.show()
 
     def set_default_interpreter(self, env):
         env_name = env.get('name')

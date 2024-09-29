@@ -1,17 +1,18 @@
 import json
 import os
 
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication, QMainWindow
 from qfluentwidgets import ComboBox, FluentIcon, RoundMenu, Action, TransparentDropDownPushButton, PushButton, \
-    TableWidget
+    TableWidget, FlyoutViewBase
 
 from conf.config import ROOT_PATH, MySettings
+from view.CreateVenvMessageBox import CreateVenvMessageBox
 
 
-class EnvManageBox(QWidget):
+class EnvManageBox(FlyoutViewBase):
 
-    def __init__(self, parent=None):
-        super(EnvManageBox, self).__init__(parent)
+    def __init__(self):
+        super(EnvManageBox, self).__init__()
         self.setup_env()
 
         self.main_layout = QVBoxLayout()
@@ -25,7 +26,7 @@ class EnvManageBox(QWidget):
     def setup_env(self):
         self.env_file = ROOT_PATH / 'conf' / "env_history.json"
         self.env_history = self.load_env_history()
-        self.env_path = MySettings.Value("default_interpreter")
+        self.env_path = MySettings.value("default_interpreter")
         if self.env_path and self.env_path.exists():
             pass
 
@@ -43,7 +44,7 @@ class EnvManageBox(QWidget):
         self.manage_button = TransparentDropDownPushButton(FluentIcon.MENU, '添加解释器')
         self.manage_button.setFixedWidth(188)
         menu = RoundMenu(parent=self.manage_button)
-        menu.addAction(Action(FluentIcon.FLAG, '添加本地解释器', triggered=lambda: print("TODO 添加本地解释器")))
+        menu.addAction(Action(FluentIcon.FLAG, '添加本地解释器', triggered=self.show_create_venv_dialog))
         menu.addAction(Action(FluentIcon.FLAG, 'SSH', triggered=lambda: print("TODO SSH")))
         menu.addAction(Action(FluentIcon.FLAG, 'Docker', triggered=lambda: print("TODO Docker")))
         self.manage_button.setMenu(menu)
@@ -99,4 +100,16 @@ class EnvManageBox(QWidget):
         if env_name and env_path:
             MySettings.setValue("default_interpreter_name", env_name)
             MySettings.setValue("default_interpreter", env_path)
-            # self.parent.dock_btn.setText(env_name)
+
+    def save_env_history(self):
+        with open(self.env_file, 'w') as file:
+            json.dump(self.env_history, file, indent=4)
+
+    def add_interpreter_to_histor(self, env_info: dict) -> None:
+        self.env_history.append(env_info)
+        self.save_env_history()
+
+    def show_create_venv_dialog(self):
+        dialog = CreateVenvMessageBox(self)
+        dialog.mkenv_signal.connect(self.add_interpreter_to_histor)
+        dialog.exec()

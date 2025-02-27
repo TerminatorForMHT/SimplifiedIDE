@@ -67,6 +67,8 @@ class Editor(QsciScintilla):
         self.setIndentationWidth(4)
         self.setIndentationsUseTabs(True)
         self.setTabIndents(True)
+
+
         self.setFolding(QsciScintilla.FoldStyle.BoxedTreeFoldStyle)
         self.setFoldMarginColors(QColor("#fafafa"), QColor("#fafafa"))
         self.setMarginType(2, QsciScintilla.MarginType.SymbolMargin)
